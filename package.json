@@ -1,0 +1,24 @@
+{
+  "name": "inquirer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc index.ts && node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.2.5",
+    "exceljs": "^4.3.0",
+    "inquirer": "^8.0.0",
+    "inquirer-search-checkbox": "^1.0.0",
+    "inquirer-search-list": "^1.2.6",
+    "xlsx": "^0.18.5",
+    "xlsx-populate": "^1.21.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.0.0"
+  }
+}
