@@ -1126,7 +1126,7 @@ function compile(_a) {
             // Example: Kırmızı
             var color = colors[j];
             // Example: SuarSB-11ProSari-691
-            var barcode = "".concat(capitalizeLetters(brand !== null && brand !== void 0 ? brand : "")).concat(productModal).concat(color, "-").concat(randomDigits);
+            var barcode = "".concat(capitalizeLetters(brand !== null && brand !== void 0 ? brand : "")).concat(productModal).concat(removeWhiteSpaces(color), "-").concat(randomDigits);
             // Fields
             var fields = {
                 Barkod: "",
@@ -1200,19 +1200,19 @@ function compile(_a) {
             res.push(fields);
         }
     }
-    writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""));
+    writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
 }
 function replaceTurkishI(text) {
     return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
 }
 var XLSX = require("xlsx");
 // TODO: Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
-function writeToExcel(resultArray, path) {
+// TODO: Create a file
+function writeToExcel(resultArray, path, mainModalCode) {
     var _a;
-    // const path = "./test1.xlsx";
     var sheetName = "Ürünlerinizi Burada Listeleyin";
     // Read the file into memory
-    var workbook = XLSX.readFile(path);
+    var workbook = XLSX.readFile("./template.xlsx");
     var worksheets = {};
     for (var _i = 0, _b = workbook.SheetNames; _i < _b.length; _i++) {
         var sheetName_1 = _b[_i];
@@ -1234,9 +1234,14 @@ function writeToExcel(resultArray, path) {
     // console.log(worksheets["Ürünlerinizi Burada Listeleyin"][0]);
     // Modify the XLSX
     (_a = worksheets[sheetName]).push.apply(_a, resultArray);
-    // // Update the XLSX file
-    XLSX.utils.sheet_add_json(workbook.Sheets[sheetName], worksheets[sheetName]);
-    XLSX.writeFile(workbook, path);
+    // Update the XLSX file
+    // XLSX.utils.sheet_add_json(workbook.Sheets[sheetName], worksheets[sheetName]);
+    // XLSX.writeFile(workbook, path);
+    // Create a new XLSX file
+    var newBook = XLSX.utils.book_new();
+    var newSheet = XLSX.utils.json_to_sheet(worksheets[sheetName]);
+    XLSX.utils.book_append_sheet(newBook, newSheet, sheetName);
+    XLSX.writeFile(newBook, "".concat(path, "\\").concat(mainModalCode, ".xlsx"));
     // [
     //   'Ürünlerinizi Burada Listeleyin',
     //   'Urun_Ozellik_Bilgileri',

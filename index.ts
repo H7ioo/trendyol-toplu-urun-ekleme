@@ -1140,7 +1140,7 @@ function compile({
       // Example: SuarSB-11ProSari-691
       const barcode = `${capitalizeLetters(
         brand ?? ""
-      )}${productModal}${color}-${randomDigits}`;
+      )}${productModal}${removeWhiteSpaces(color)}-${randomDigits}`;
 
       // Fields
       let fields = {
@@ -1217,7 +1217,7 @@ function compile({
       res.push(fields);
     }
   }
-  writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""));
+  writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
 }
 
 function replaceTurkishI(text: string) {
@@ -1229,12 +1229,11 @@ import * as XLSX from "xlsx";
 import * as ExcelJS from "exceljs";
 
 // TODO: Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
-
-function writeToExcel(resultArray: {}[], path: string) {
-  // const path = "./test1.xlsx";
+// TODO: Create a file
+function writeToExcel(resultArray: {}[], path: string, mainModalCode: string) {
   const sheetName = "Ürünlerinizi Burada Listeleyin";
   // Read the file into memory
-  const workbook = XLSX.readFile(path);
+  const workbook = XLSX.readFile("./template.xlsx");
 
   // Convert the XLSX to JSON
   type worksheetsType = {
@@ -1266,9 +1265,15 @@ function writeToExcel(resultArray: {}[], path: string) {
   // Modify the XLSX
   worksheets[sheetName].push(...resultArray);
 
-  // // Update the XLSX file
-  XLSX.utils.sheet_add_json(workbook.Sheets[sheetName], worksheets[sheetName]);
-  XLSX.writeFile(workbook, path);
+  // Update the XLSX file
+  // XLSX.utils.sheet_add_json(workbook.Sheets[sheetName], worksheets[sheetName]);
+  // XLSX.writeFile(workbook, path);
+
+  // Create a new XLSX file
+  const newBook = XLSX.utils.book_new();
+  const newSheet = XLSX.utils.json_to_sheet(worksheets[sheetName]);
+  XLSX.utils.book_append_sheet(newBook, newSheet, sheetName);
+  XLSX.writeFile(newBook, `${path}\\${mainModalCode}.xlsx`);
 
   // [
   //   'Ürünlerinizi Burada Listeleyin',
@@ -1304,6 +1309,7 @@ function writeToExcel(resultArray: {}[], path: string) {
 //   "Garanti Süresi": "Belirtilmemiş",
 //   "Uyumlu Marka": "Apple",
 // };
+
 // const fields = {
 //   Barkod: "",
 //   "Model Kodu": "",
