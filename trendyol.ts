@@ -1154,6 +1154,7 @@ function compile({
         "Piyasa Satış Fiyatı (KDV Dahil)": "",
         "Trendyol'da Satılacak Fiyat (KDV Dahil)": "",
         "Ürün Stok Adedi": "",
+        "Stok Kodu": "",
         "KDV Oranı": KDV["3"],
         Desi: "",
         "Görsel 1": "",
@@ -1206,6 +1207,7 @@ function compile({
       fields["Piyasa Satış Fiyatı (KDV Dahil)"] = globalPrice;
       fields["Trendyol'da Satılacak Fiyat (KDV Dahil)"] = price;
       fields["Ürün Stok Adedi"] = stock;
+      fields["Stok Kodu"] = mainModalCode;
       fields["KDV Oranı"] = KDV["3"];
       fields.Renk = color;
       fields.Materyal = material;
@@ -1233,7 +1235,7 @@ import * as ExcelJS from "exceljs";
 function writeToExcel(resultArray: {}[], path: string, mainModalCode: string) {
   const sheetName = "Ürünlerinizi Burada Listeleyin";
   // Read the file into memory
-  const workbook = XLSX.readFile("./template.xlsx");
+  const workbook = XLSX.readFile("./trendyol.xlsx");
 
   // Convert the XLSX to JSON
   type worksheetsType = {

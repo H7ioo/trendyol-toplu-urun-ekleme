@@ -1139,6 +1139,7 @@ function compile(_a) {
                 "Piyasa Satış Fiyatı (KDV Dahil)": "",
                 "Trendyol'da Satılacak Fiyat (KDV Dahil)": "",
                 "Ürün Stok Adedi": "",
+                "Stok Kodu": "",
                 "KDV Oranı": KDV["3"],
                 Desi: "",
                 "Görsel 1": "",
@@ -1189,6 +1190,7 @@ function compile(_a) {
             fields["Piyasa Satış Fiyatı (KDV Dahil)"] = globalPrice;
             fields["Trendyol'da Satılacak Fiyat (KDV Dahil)"] = price;
             fields["Ürün Stok Adedi"] = stock;
+            fields["Stok Kodu"] = mainModalCode;
             fields["KDV Oranı"] = KDV["3"];
             fields.Renk = color;
             fields.Materyal = material;

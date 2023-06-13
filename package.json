@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc index.ts && node index.js"
+    "t": "tsc trendyol.ts && node trendyol.js",
+    "h": "tsc hepsiburada.ts && node hepsiburada.js"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@types/node": "^20.2.5",
     "exceljs": "^4.3.0",
+    "fs": "^0.0.1-security",
     "inquirer": "^8.0.0",
     "inquirer-search-checkbox": "^1.0.0",
     "inquirer-search-list": "^1.2.6",
