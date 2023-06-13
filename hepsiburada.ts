@@ -2754,20 +2754,20 @@ function compile({
     for (let j = 0; j < colors.length; j++) {
       // Example: Kırmızı
       const color = colors[j];
-      // Example: SuarSB-11ProSari-691
+      // Example: SuarSB-11Pro-Sari-691
       const barcode = `${capitalizeLetters(
         brand ?? ""
-      )}${productModal}${removeWhiteSpaces(color)}-${randomDigits}`;
+      )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
 
       // Example: SB-11Pro-Siyah
-      const iHateHepsiburada = `${productModal}-${color}`;
+      const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(color)}`;
 
       for (let x = 0; x < options.length; x++) {
         const option = options[x];
         // Fields
         let fields = {
           "Ürün Adı": productTitle,
-          "Satıcı Stok Kodu": iHateHepsiburada,
+          "Satıcı Stok Kodu": iHateHepsiburada.toUpperCase(), // Cause HEPSIBURADA SUCKS
           Barkod: barcode,
           "Varyant Grup Id": productModal,
           "Ürün Açıklaması": productDescription,
