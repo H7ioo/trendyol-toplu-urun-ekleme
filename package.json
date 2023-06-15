@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "t": "tsc trendyol.ts && node trendyol.js",
-    "h": "tsc hepsiburada.ts && node hepsiburada.js"
+    "t": "ts-node trendyol.ts",
+    "h": "ts-node hepsiburada.ts"
   },
   "keywords": [],
   "author": "",
@@ -17,10 +17,14 @@
     "inquirer": "^8.0.0",
     "inquirer-search-checkbox": "^1.0.0",
     "inquirer-search-list": "^1.2.6",
+    "ts-node": "^10.9.1",
     "xlsx": "^0.18.5",
     "xlsx-populate": "^1.21.0"
   },
   "devDependencies": {
-    "@types/inquirer": "^8.0.0"
+    "@types/inquirer": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.11",
+    "@typescript-eslint/parser": "^5.59.11",
+    "eslint": "^8.42.0"
   }
 }

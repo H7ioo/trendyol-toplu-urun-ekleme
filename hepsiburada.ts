@@ -1,5 +1,7 @@
-import { Answers, QuestionCollection, prompt, registerPrompt } from "inquirer";
+import { QuestionCollection, prompt, registerPrompt } from "inquirer";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 registerPrompt("search-list", require("inquirer-search-list"));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 
 // prompt([
@@ -2499,7 +2501,7 @@ const promptQuestions: QuestionCollection = [
     type: "input",
     name: "title",
     message: "Ürün adı yazınız",
-    filter: (input, answer) => {
+    filter: (input) => {
       return capitalizeLetters(cleanUp(input));
     },
     validate: lengthValidator,
@@ -2534,7 +2536,7 @@ const promptQuestions: QuestionCollection = [
     type: "input",
     name: "options",
     message: "Seçenekler yazınız (aralarında virgül koyarak)",
-    filter: (input, answer) => {
+    filter: (input) => {
       return cleanUp(input)
         .split(",")
         .map((option) => {
@@ -2649,7 +2651,7 @@ main();
  * @example cleanUp("   Text HERE ")
  */
 
-function cleanUp(text: string, lowerCase: boolean = true) {
+function cleanUp(text: string, lowerCase = true) {
   const res = text.trim().replace(/\s+/g, " ");
   return lowerCase ? res.toLowerCase() : res;
 }
@@ -2722,8 +2724,8 @@ function compile({
   title,
   path,
   options,
-  phoneBrandCrap,
-}: promptAnswers) {
+}: // phoneBrandCrap,
+promptAnswers) {
   const res = [];
   for (let i = 0; i < phonesList.length; i++) {
     // Example: Iphone 11 Pro (from Excel Sheet)
@@ -2765,7 +2767,7 @@ function compile({
       for (let x = 0; x < options.length; x++) {
         const option = options[x];
         // Fields
-        let fields = {
+        const fields = {
           "Ürün Adı": productTitle,
           "Satıcı Stok Kodu": iHateHepsiburada.toUpperCase(), // Cause HEPSIBURADA SUCKS
           Barkod: barcode,
@@ -2808,22 +2810,26 @@ function replaceTurkishI(text: string) {
   return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
 }
 
-import * as fs from "fs";
+// import * as fs from "fs";
 import * as XLSX from "xlsx";
-import * as ExcelJS from "exceljs";
+// import * as ExcelJS from "exceljs";
 
 // TODO: Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
 // TODO: Create a file
-function writeToExcel(resultArray: {}[], path: string, mainModalCode: string) {
+function writeToExcel(
+  resultArray: object[],
+  path: string,
+  mainModalCode: string
+) {
   const sheetName = "Kılıflar";
   // Read the file into memory
   const workbook = XLSX.readFile("./hepsiburada.xlsx");
 
   // Convert the XLSX to JSON
   type worksheetsType = {
-    [key: string]: {}[];
+    [key: string]: object[];
   };
-  let worksheets: worksheetsType = {};
+  const worksheets: worksheetsType = {};
   for (const sheetName of workbook.SheetNames) {
     // Some helper functions in XLSX.utils generate different views of the sheets:
     //     XLSX.utils.sheet_to_csv generates CSV
