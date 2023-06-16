@@ -1141,7 +1141,7 @@ function compile({
       // Example: SuarSB-11ProSari-691
       const barcode = `${capitalizeLetters(
         brand ?? ""
-      )}${productModal}${removeWhiteSpaces(color)}-${randomDigits}`;
+      )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
 
       // Fields
       const fields = {
@@ -1348,3 +1348,5 @@ function writeToExcel(
 //   "Garanti Süresi": "",
 //   "Uyumlu Marka": "",
 // };
+
+// TODO: Remove unnecessary code and structure the files
