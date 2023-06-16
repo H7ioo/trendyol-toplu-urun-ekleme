@@ -1280,7 +1280,7 @@ function writeToExcel(
   const newBook = XLSX.utils.book_new();
   const newSheet = XLSX.utils.json_to_sheet(worksheets[sheetName]);
   XLSX.utils.book_append_sheet(newBook, newSheet, sheetName);
-  XLSX.writeFile(newBook, `${path}\\${mainModalCode}.xlsx`);
+  XLSX.writeFile(newBook, `${path}\\${mainModalCode}-trendyol.xlsx`);
 
   // [
   //   'Ürünlerinizi Burada Listeleyin',
