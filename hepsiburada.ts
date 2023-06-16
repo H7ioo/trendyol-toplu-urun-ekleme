@@ -314,7 +314,7 @@ function writeToExcel(
 ) {
   const sheetName = "Kılıflar";
   // Read the file into memory
-  const workbook = XLSX.readFile("./hepsiburada.xlsx");
+  const workbook = XLSX.readFile("./xlsx/hepsiburada.xlsx");
 
   // Convert the XLSX to JSON
   type worksheetsType = {

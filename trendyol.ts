@@ -355,7 +355,7 @@ function writeToExcel(
 ) {
   const sheetName = "Ürünlerinizi Burada Listeleyin";
   // Read the file into memory
-  const workbook = XLSX.readFile("./trendyol.xlsx");
+  const workbook = XLSX.readFile("./xlsx/trendyol.xlsx");
 
   // Convert the XLSX to JSON
   type worksheetsType = {
