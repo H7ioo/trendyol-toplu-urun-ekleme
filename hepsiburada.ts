@@ -13,36 +13,6 @@ registerPrompt("search-list", require("inquirer-search-list"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 
-type promptAnswers = {
-  title: string;
-  // sellerStockCode: string; // = mainModalCode
-  barcode: string;
-  // groupId: string; // gets generated
-  productDescription: string;
-  brand: string | undefined;
-  desi: string; // number
-  KDV: (typeof KDVH)[number];
-  guaranteePeriod: string; // number
-  // IMAGES
-  price: string;
-  stockAmount: string;
-  // VIDEO
-  phoneBrandCrap: (typeof crapH)[number][] | undefined;
-  colors: (typeof colorsH)[number][];
-  options: string[];
-  phonesList: (typeof phonesH)[number][];
-  caseBrand: (typeof caseBrandsH)[number];
-  guaranteeType: (typeof guaranteesTypeH)[number] | undefined;
-  waterProof: (typeof waterProofH)[number] | undefined;
-  material: (typeof materialsH)[number];
-  caseType: (typeof casesTypesH)[number];
-
-  // Helpers
-  mainModalCode: string;
-  phoneType: string;
-  path: string;
-};
-
 // Questions collection
 const promptQuestions: QuestionCollection = [
   {
@@ -184,7 +154,7 @@ async function main() {
       }
     });
   //
-  const result = res as promptAnswers;
+  const result = res as promptAnswersH;
   compile(result);
 }
 main();
@@ -205,12 +175,11 @@ function compile({
   path,
   options,
 }: // phoneBrandCrap,
-promptAnswers) {
+promptAnswersH) {
   const res = [];
   for (let i = 0; i < phonesList.length; i++) {
     // Example: Iphone 11 Pro (from Excel Sheet)
     const phoneName = phonesList[i];
-    // TODO: I can have an option to write how many words is it. For example: Samsung Galaxy (2), iPhone (1), Xiaomi Redmi (2)
     // - This doesn't work on 2 words brand
     // const phoneCode = capitalizeLetters(
     //   phonesList[i].split(" ").slice(1).join(" ")
@@ -302,11 +271,10 @@ import {
   materialsH,
   phonesH,
   waterProofH,
-} from "./variables/hepsiburada";
+} from "./variables/variables";
+import { promptAnswersH } from "./types/types";
 // import * as ExcelJS from "exceljs";
 
-// TODO: Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
-// TODO: Create a file
 function writeToExcel(
   resultArray: object[],
   path: string,
@@ -364,34 +332,3 @@ function writeToExcel(
 }
 
 // I hate both of Trendyol and Hepsiburada but Hepsiburada takes the throne
-
-const fields = {
-  "Ürün Adı": "",
-  "Satıcı Stok Kodu": "",
-  Barkod: "",
-  "Varyant Grup Id": "",
-  "Ürün Açıklaması": "",
-  Marka: "",
-  Desi: "",
-  KDV: 1,
-  "Garanti Süresi (Ay)": 1,
-  Görsel1: "",
-  Görsel2: "",
-  Görsel3: "",
-  Görsel4: "",
-  Görsel5: "",
-  Fiyat: 1,
-  Stok: "",
-  Video: "",
-  "Uyumlu Model": "",
-  Renk: "",
-  Seçenek: "",
-  "Telefon Modeli": "",
-  "Uyumlu Marka": "",
-  "Garanti Tipi": "",
-  "Su Geçirmezlik": "",
-  "Ürün  Kodu": "",
-  "Malzeme Türü": "",
-  "Garanti Tipi2": "",
-  "Kılıf Tipi": "",
-};

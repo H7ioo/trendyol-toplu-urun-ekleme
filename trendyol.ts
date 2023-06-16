@@ -14,26 +14,6 @@ registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 
 // # Cep telefon modeli
 
-// TODO: Add KDV (no need if it's always 18)
-
-type promptAnswers = {
-  title: string;
-  phoneType: string;
-  phonesList: string[];
-  mainModalCode: string;
-  brand: string | undefined;
-  colors: string[];
-  globalPrice: string;
-  price: string;
-  stock: string;
-  description: string;
-  material: (typeof materialsT)[number];
-  caseType: (typeof casesTypesT)[number];
-  guaranteePeriod: (typeof guaranteesPeriodT)[number];
-  caseBrand: (typeof caseBrandsT)[number];
-  path: string;
-};
-
 // Questions collection
 const promptQuestions: QuestionCollection = [
   {
@@ -190,7 +170,7 @@ async function main() {
       }
     });
   //
-  const result = res as promptAnswers;
+  const result = res as promptAnswersT;
   compile(result);
 }
 main();
@@ -213,7 +193,7 @@ function compile({
   stock,
   title,
   path,
-}: promptAnswers) {
+}: promptAnswersT) {
   const res = [];
   for (let i = 0; i < phonesList.length; i++) {
     // Example: Iphone 11 Pro (from Excel Sheet)
@@ -250,17 +230,17 @@ function compile({
 
       // Fields
       const fields = {
-        Barkod: "",
-        "Model Kodu": "",
-        Marka: "",
-        Kategori: "",
-        "Para Birimi": "",
-        "Ürün Adı": "",
-        "Ürün Açıklaması": "",
-        "Piyasa Satış Fiyatı (KDV Dahil)": "",
-        "Trendyol'da Satılacak Fiyat (KDV Dahil)": "",
-        "Ürün Stok Adedi": "",
-        "Stok Kodu": "",
+        Barkod: barcode,
+        "Model Kodu": productModal,
+        Marka: brand ?? "",
+        Kategori: categoryT,
+        "Para Birimi": currencyT,
+        "Ürün Adı": productTitle,
+        "Ürün Açıklaması": description,
+        "Piyasa Satış Fiyatı (KDV Dahil)": globalPrice,
+        "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+        "Ürün Stok Adedi": stock,
+        "Stok Kodu": mainModalCode,
         "KDV Oranı": KDVT["3"],
         Desi: "",
         "Görsel 1": "",
@@ -273,54 +253,15 @@ function compile({
         "Görsel 8": "",
         "Sevkiyat Süresi": "",
         "Sevkiyat Tipi": "",
-        Renk: "",
-        Materyal: "",
-        Model: "",
-        "Cep Telefonu Modeli": "",
+        Renk: color,
+        Materyal: material,
+        Model: caseType,
+        "Cep Telefonu Modeli": phoneName,
         "Garanti Tipi": "",
-        "Garanti Süresi": "",
-        "Uyumlu Marka": "",
+        "Garanti Süresi": guaranteePeriod,
+        "Uyumlu Marka": caseBrand,
       };
 
-      // let fields = {
-      //   Barkod: "",
-      //   "Model Kodu": "",
-      //   Marka: "",
-      //   Kategori: "",
-      //   "Para Birimi": "",
-      //   "Ürün Adı": "",
-      //   "Ürün Açıklaması": "",
-      //   "Piyasa Satış Fiyatı (KDV Dahil)": "",
-      //   "Trendyol'da Satılacak Fiyat (KDV Dahil)": "",
-      //   "Ürün Stok Adedi": "",
-      //   "KDV Oranı": KDV["3"],
-      //   Renk: "",
-      //   Materyal: "",
-      //   Model: "",
-      //   "Cep Telefonu Modeli": "",
-      //   "Garanti Süresi": "",
-      //   "Uyumlu Marka": "",
-      // };
-
-      // Pass the data to the fields
-      fields.Barkod = barcode;
-      fields["Model Kodu"] = productModal;
-      fields["Marka"] = brand ?? "";
-      fields.Kategori = categoryT;
-      fields["Para Birimi"] = currencyT;
-      fields["Ürün Adı"] = productTitle;
-      fields["Ürün Açıklaması"] = description;
-      fields["Piyasa Satış Fiyatı (KDV Dahil)"] = globalPrice;
-      fields["Trendyol'da Satılacak Fiyat (KDV Dahil)"] = price;
-      fields["Ürün Stok Adedi"] = stock;
-      fields["Stok Kodu"] = mainModalCode;
-      fields["KDV Oranı"] = KDVT["3"];
-      fields.Renk = color;
-      fields.Materyal = material;
-      fields.Model = caseType;
-      fields["Cep Telefonu Modeli"] = phoneName;
-      fields["Garanti Süresi"] = guaranteePeriod;
-      fields["Uyumlu Marka"] = caseBrand;
       // Push to the array
       res.push(fields);
     }
@@ -343,11 +284,10 @@ import {
   guaranteesPeriodT,
   materialsT,
   phonesT,
-} from "./variables/trendyol";
+} from "./variables/variables";
+import { promptAnswersT } from "./types/types";
 // import * as ExcelJS from "exceljs";
 
-// TODO: Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
-// TODO: Create a file
 function writeToExcel(
   resultArray: object[],
   path: string,
@@ -403,65 +343,3 @@ function writeToExcel(
   //   'Yardım'
   // ]
 }
-
-// const fields = {
-//   Barkod: "732SuarKFAS-11Pembe",
-//   "Model Kodu": "KFAS-11",
-//   Marka: "SUAR",
-//   Kategori: "766",
-//   "Para Birimi": "TRY",
-//   "Ürün Adı": "iPhone 11 Uyumlu Kedi Figürlü Aynalı Silikon Kılıf",
-//   "Ürün Açıklaması":
-//     "<div><ul>\r\n" +
-//     "\t<li> Bu üstün kaliteli ve sağlam silikon kılıf, en üst düzeyde darbelere karşı koruma sağlar ve cihazınızı güvende tutar. Yüksek kaliteli malzeme kullanılarak üretilmiş olan kılıf, renk değişimi, sararma veya benzeri sorunlarla karşılaşmanızı engeller. Ürün modeli, cihazınızla mükemmel bir uyum sağlar ve tam oturur, böylece her açıdan maksimum koruma sağlar. Kapağı çıkartmadan kolaylıkla tüm slotlara (sarj ve kulaklık girişleri) erişebilirsiniz. Özel kalıbı sayesinde cihazınıza mükemmel bir şekilde uyar ve pratik kullanım sağlar. Ayrıca, kılıfın üzerinde yer alan muhteşem kedi figürleri ve ayna detaylarıyla da dikkat çeker, telefonunuza şık ve göz alıcı bir görünüm kazandırır.\r\n" +
-//     "\t</li>\r\n" +
-//     "</ul><div>",
-//   "Piyasa Satış Fiyatı (KDV Dahil)": 200,
-//   "Trendyol'da Satılacak Fiyat (KDV Dahil)": 149.9,
-//   "Ürün Stok Adedi": 100,
-//   "KDV Oranı": "18",
-//   "Görsel 1":
-//     "https://marketplace-supplier-media-center.oss-eu-central-1.aliyuncs.com/prod/582477/4b5535dc-338f-4ae1-86ee-729135adf76c/KFAS-11-pembe.jpg?x-oss-process=style/resized",
-//   "Görsel 2":
-//     "https://marketplace-supplier-media-center.oss-eu-central-1.aliyuncs.com/prod/582477/9dd2015a-f0cb-418f-9ab6-09aa489d63f3/KFAS-11-pembe2.jpg?x-oss-process=style/resized",
-//   Renk: "Pembe",
-//   Materyal: "Silikon",
-//   Model: "Arka Kapak",
-//   "Cep Telefonu Modeli": "Iphone 11",
-//   "Garanti Süresi": "Belirtilmemiş",
-//   "Uyumlu Marka": "Apple",
-// };
-
-// const fields = {
-//   Barkod: "",
-//   "Model Kodu": "",
-//   Marka: "",
-//   Kategori: "",
-//   "Para Birimi": "",
-//   "Ürün Adı": "",
-//   "Ürün Açıklaması": "",
-//   "Piyasa Satış Fiyatı (KDV Dahil)": 1,
-//   "Trendyol'da Satılacak Fiyat (KDV Dahil)": 1,
-//   "Ürün Stok Adedi": 1,
-//   "KDV Oranı": "1",
-//   Desi: 1,
-//   "Görsel 1": "",
-//   "Görsel 2": "",
-//   "Görsel 3": "",
-//   "Görsel 4": "",
-//   "Görsel 5": "",
-//   "Görsel 6": "",
-//   "Görsel 7": "",
-//   "Görsel 8": "",
-//   "Sevkiyat Süresi": 1,
-//   "Sevkiyat Tipi": "",
-//   Renk: "",
-//   Materyal: "",
-//   Model: "",
-//   "Cep Telefonu Modeli": "",
-//   "Garanti Tipi": "",
-//   "Garanti Süresi": "",
-//   "Uyumlu Marka": "",
-// };
-
-// TODO: Remove unnecessary code and structure the files
