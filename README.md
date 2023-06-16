@@ -27,7 +27,9 @@ Last prompt is path, you need to paste folder path so it creates the file there.
 1.  "Ürün adı" should not contain the phone name.
     - Starbucks Sulu Kılıf ✅
     - iPhone 11 Uyumlu Starbucks Sulu Kılıf ❌
-2.  "Telefonun bilinen adı yazınız" should contain the same words with the phone model - Telefonun bilinen adı: Samsung. Telefon modelli: Samsung A10 ✅ - Telefonun bilinen adı: Samsung Galaxy. Telefon modelli: Samsung A10 ❌
+2.  "Telefonun bilinen adı yazınız" should contain the same words with the phone model.
+    - Telefonun bilinen adı: Samsung. Telefon modelli: Samsung A10 ✅ 
+    - Telefonun bilinen adı: Samsung Galaxy. Telefon modelli: Samsung A10 ❌
     ![CLI example image](https://i.imgur.com/FzCMB0h.png)
 3.  "Ürün açıklaması" should be HTML
     ![CLI example image](https://i.imgur.com/WwN4Nuf.png)
