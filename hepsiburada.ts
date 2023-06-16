@@ -7,6 +7,21 @@ import {
   numberValidator,
   removeWhiteSpaces,
 } from "./helpers/utils";
+// import * as fs from "fs";
+import * as XLSX from "xlsx";
+import {
+  KDVH,
+  caseBrandsH,
+  casesTypesH,
+  colorsH,
+  crapH,
+  guaranteesTypeH,
+  materialsH,
+  phonesH,
+  waterProofH,
+} from "./variables/variables";
+import { promptAnswersH } from "./types/types";
+// import * as ExcelJS from "exceljs";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 registerPrompt("search-list", require("inquirer-search-list"));
@@ -258,22 +273,6 @@ promptAnswersH) {
 function replaceTurkishI(text: string) {
   return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
 }
-
-// import * as fs from "fs";
-import * as XLSX from "xlsx";
-import {
-  KDVH,
-  caseBrandsH,
-  casesTypesH,
-  colorsH,
-  crapH,
-  guaranteesTypeH,
-  materialsH,
-  phonesH,
-  waterProofH,
-} from "./variables/variables";
-import { promptAnswersH } from "./types/types";
-// import * as ExcelJS from "exceljs";
 
 function writeToExcel(
   resultArray: object[],

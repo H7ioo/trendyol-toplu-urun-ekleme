@@ -9,10 +9,23 @@ import {
   removeWhiteSpaces,
 } from "./helpers/utils";
 
+// import * as fs from "fs";
+import * as XLSX from "xlsx";
+import {
+  KDVT,
+  caseBrandsT,
+  casesTypesT,
+  categoryT,
+  currencyT,
+  guaranteesPeriodT,
+  materialsT,
+  phonesT,
+} from "./variables/variables";
+import { promptAnswersT } from "./types/types";
+// import * as ExcelJS from "exceljs";
+
 registerPrompt("search-list", require("inquirer-search-list"));
 registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
-
-// # Cep telefon modeli
 
 // Questions collection
 const promptQuestions: QuestionCollection = [
@@ -36,21 +49,7 @@ const promptQuestions: QuestionCollection = [
     validate: lengthValidator,
     suffix: ":",
   },
-  // {
-  //   type: "input",
-  //   name: "phonesList",
-  //   message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
-  //   filter: (input, answer) => {
-  //     return cleanUp(input)
-  //       .split(",")
-  //       .map((phoneAnswer) => {
-  //         // return removeWhiteSpaces(upperLetters(phoneAnswer));
-  //         return capitalizeLetters(phoneAnswer);
-  //       });
-  //   },
-  //   validate: lengthValidator,
-  //   suffix: ":",
-  // },
+
   {
     type: "search-checkbox",
     name: "phonesList",
@@ -272,21 +271,6 @@ function compile({
 function replaceTurkishI(text: string) {
   return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
 }
-
-// import * as fs from "fs";
-import * as XLSX from "xlsx";
-import {
-  KDVT,
-  caseBrandsT,
-  casesTypesT,
-  categoryT,
-  currencyT,
-  guaranteesPeriodT,
-  materialsT,
-  phonesT,
-} from "./variables/variables";
-import { promptAnswersT } from "./types/types";
-// import * as ExcelJS from "exceljs";
 
 function writeToExcel(
   resultArray: object[],
