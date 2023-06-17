@@ -91,7 +91,7 @@ export const promptQuestionsT: QuestionCollection = [
   {
     type: "input",
     name: "price",
-    message: "Trendyol satış fiyatı yazınız",
+    message: "Trendyol satış fiyatı yazınız (.)",
     validate: numberValidator,
     suffix: ":",
   },
@@ -225,7 +225,7 @@ export const promptQuestionsH: QuestionCollection = [
   {
     type: "input",
     name: "price",
-    message: "Satış fiyatı yazınız",
+    message: "Satış fiyatı yazınız (,)",
     validate: numberValidator,
     suffix: ":",
   },
