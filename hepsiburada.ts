@@ -1,26 +1,15 @@
-import { QuestionCollection, prompt, registerPrompt } from "inquirer";
+import { prompt, registerPrompt } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
   digitGen,
-  lengthValidator,
-  numberValidator,
   removeWhiteSpaces,
 } from "./helpers/utils";
 // import * as fs from "fs";
 import * as XLSX from "xlsx";
-import {
-  KDVH,
-  caseBrandsH,
-  casesTypesH,
-  colorsH,
-  crapH,
-  guaranteesTypeH,
-  materialsH,
-  phonesH,
-  waterProofH,
-} from "./variables/variables";
+import { KDVH } from "./variables/variables";
 import { promptAnswersH } from "./types/types";
+import { promptQuestionsH } from "./variables/prompts";
 // import * as ExcelJS from "exceljs";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -28,136 +17,9 @@ registerPrompt("search-list", require("inquirer-search-list"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 
-// Questions collection
-const promptQuestions: QuestionCollection = [
-  {
-    type: "input",
-    name: "title",
-    message: "Ürün adı yazınız",
-    filter: (input) => {
-      return capitalizeLetters(cleanUp(input));
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "phoneType",
-    message: "Telefonun bilinen adı yazınız",
-    filter: (input) => {
-      return cleanUp(input, false);
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-checkbox",
-    name: "phonesList",
-    message: "Telefon modelleri seçiniz",
-    choices: phonesH,
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  // {
-  //   type: "search-checkbox",
-  //   name: "phoneBrandCrap",
-  //   message: "phoneBrandCrap seçiniz",
-  //   choices: crap,
-  //   suffix: ":",
-  // },
-  {
-    type: "input",
-    name: "options",
-    message: "Seçenekler yazınız (aralarında virgül koyarak)",
-    filter: (input) => {
-      return cleanUp(input)
-        .split(",")
-        .map((option) => {
-          // return removeWhiteSpaces(upperLetters(phoneAnswer));
-          return capitalizeLetters(option);
-        });
-    },
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "mainModalCode",
-    message: "Ana model kodu yazınız",
-    filter: (input) => {
-      return cleanUp(input).toUpperCase();
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "brand",
-    message: "Marka adı yazınız",
-    // validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-checkbox",
-    name: "colors",
-    message: "Renkleri seçiniz",
-    choices: colorsH,
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "price",
-    message: "Satış fiyatı yazınız",
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "stockAmount",
-    message: "Stock adedi yazınız",
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "productDescription",
-    message: "Ürün açıklaması yazınız",
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "material",
-    message: "Materyal seçiniz",
-    choices: materialsH,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "caseType",
-    message: "Kılıf modeli seçiniz",
-    choices: casesTypesH,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "caseBrand",
-    message: "Uyumlu marka seçiniz",
-    choices: caseBrandsH,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "path",
-    message: "Path?",
-    validate: lengthValidator,
-    suffix: ":",
-  },
-];
-
 async function main() {
   // Handling prompt
-  const res = await prompt(promptQuestions)
+  const res = await prompt(promptQuestionsH)
     .then((answers) => {
       return answers;
     })

@@ -1,45 +1,64 @@
 import { Client } from "@notionhq/client";
-import { z } from "zod";
 
-import dotenv from "dotenv";
+import { WithAuth } from "@notionhq/client/build/src/Client";
+import { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import { ENV } from "./env";
 
 const notion = new Client({
-  auth: process.env.NOTION_TOKEN,
+  auth: ENV.NOTION_TOKEN,
 });
-
-let envSchema = z.object({
-  NOTION_TOKEN: z.string().nonempty(),
-  TRENDYOL_PRODUCT_DATABASE: z.string().nonempty(),
-  TRENDYOL_PHONES_DATABASE: z.string().nonempty(),
-  TRENDYOL_MODAL_CODE_DATABASE: z.string().nonempty(),
-  TRENDYOL_PRODUCT_BARCODE_DATABASE: z.string().nonempty(),
-});
-
-let env = envSchema.parse(process.env);
-
-dotenv.config();
-
-// TODO: Add the desc to the page it self inside a code block
 
 interface TrendyolNotionProps {
-  // Product
-  title: string;
-  // ParseInt()
-  price: number;
-  piyasa: number;
-  mainModalCode: string;
-  //
+  createProduct: {
+    // Product
+    title: string;
+    // ParseFloat() ! Trendyol uses . | Hepsiburada uses , .replace(/,/gi, ".")
+    price: number;
+    piyasa: number;
+    mainModalCode: string;
+    // Page Content
+    description: string;
+  };
+  createModelCode: {
+    modelCode: string;
+    relationId: string;
+  };
+  createBarcode: {
+    barcode: string;
+    relationId: string;
+  };
 }
 
-export const trendyolNotion = async ({ title }: TrendyolNotionProps) => {
-  const response = await notion.pages.create({
+export const trendyolNotionCreateProduct = async ({
+  title,
+  price,
+  piyasa,
+  mainModalCode,
+  description,
+}: TrendyolNotionProps["createProduct"]) => {
+  const productObj: WithAuth<CreatePageParameters> = {
     parent: {
-      database_id: env.TRENDYOL_PRODUCT_DATABASE,
+      database_id: ENV.TRENDYOL_PRODUCT_DATABASE,
     },
-    icon: {
-      type: "emoji",
-      emoji: "😳",
-    },
+    children: [
+      {
+        type: "heading_3",
+        heading_3: {
+          rich_text: [{ type: "text", text: { content: "Açıklama" } }],
+        },
+      },
+      {
+        type: "code",
+        code: {
+          rich_text: [{ type: "text", text: { content: description } }],
+          language: "html",
+        },
+      },
+    ],
+    // icon: {
+    //   type: "emoji",
+    //   emoji: "",
+    // },
     properties: {
       Name: {
         type: "title",
@@ -47,25 +66,95 @@ export const trendyolNotion = async ({ title }: TrendyolNotionProps) => {
           {
             type: "text",
             text: {
-              content: "Lazer Panda Stantli Kilif",
+              content: title,
             },
           },
         ],
       },
-      // TODO: To much pain to do
-      "Product Group ID": {
-        type: "relation",
-        relation: [{ id: "82fb4113ac0c40588a5a356f29f29646" }],
+      // "Product Group ID": {
+      //   type: "relation",
+      //   relation: [{ id: "82fb4113ac0c40588a5a356f29f29646" }],
+      // },
+      Piyasa: {
+        type: "number",
+        number: piyasa,
       },
       Fiyat: {
         type: "number",
-        number: 100,
+        number: price,
       },
-      Piyasa: {
-        type: "number",
-        number: 100,
+      "Ana Model Kodu": {
+        type: "rich_text",
+        rich_text: [{ type: "text", text: { content: mainModalCode } }],
       },
     },
-  });
-  console.log(response);
+  };
+  const productRes = await notion.pages.create(productObj);
+
+  const productId = productRes.id;
+  return productId;
+};
+
+export const trendyolNotionCreateModelCode = async ({
+  modelCode,
+  relationId,
+}: TrendyolNotionProps["createModelCode"]) => {
+  const modelObj: WithAuth<CreatePageParameters> = {
+    parent: {
+      database_id: ENV.TRENDYOL_PRODUCT_MODAL_CODE_DATABASE,
+    },
+    properties: {
+      "Model Kodu": {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: modelCode,
+            },
+          },
+        ],
+      },
+      Ürün: {
+        type: "relation",
+        relation: [{ id: relationId }],
+      },
+    },
+  };
+  const modelRes = await notion.pages.create(modelObj);
+
+  const modelId = modelRes.id;
+  return modelId;
+};
+
+export const trendyolNotionCreateBarcode = async ({
+  barcode,
+  relationId,
+}: TrendyolNotionProps["createBarcode"]) => {
+  const modelObj: WithAuth<CreatePageParameters> = {
+    parent: {
+      database_id: ENV.TRENDYOL_PRODUCT_BARCODE_DATABASE,
+    },
+    properties: {
+      Barkod: {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: barcode,
+            },
+          },
+        ],
+      },
+      "Model Kodu": {
+        type: "relation",
+        relation: [{ id: relationId }],
+      },
+    },
+  };
+  const modelRes = await notion.pages.create(modelObj);
+
+  const modelId = modelRes.id;
+  return modelId;
 };

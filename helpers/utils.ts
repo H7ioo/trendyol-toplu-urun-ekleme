@@ -69,3 +69,9 @@ export function lengthValidator(text: string | string[]) {
 export function numberValidator(value: string) {
   return !isNaN(parseInt(value)) && lengthValidator(value);
 }
+
+export function convertToNumber(value: string, float = true) {
+  const v = value.replace(/,/gi, ".");
+  if (float) return parseFloat(v);
+  return parseInt(v);
+}

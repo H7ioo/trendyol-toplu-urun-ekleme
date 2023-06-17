@@ -1,163 +1,31 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { QuestionCollection, prompt, registerPrompt } from "inquirer";
+import { prompt, registerPrompt } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
+  convertToNumber,
   digitGen,
-  lengthValidator,
-  numberValidator,
   removeWhiteSpaces,
 } from "./helpers/utils";
 
 // import * as fs from "fs";
 import * as XLSX from "xlsx";
-import {
-  KDVT,
-  caseBrandsT,
-  casesTypesT,
-  categoryT,
-  currencyT,
-  guaranteesPeriodT,
-  materialsT,
-  phonesT,
-} from "./variables/variables";
+import { KDVT, categoryT, currencyT } from "./variables/variables";
 import { promptAnswersT } from "./types/types";
+import { promptQuestionsT } from "./variables/prompts";
+import {
+  trendyolNotionCreateBarcode,
+  trendyolNotionCreateModelCode,
+  trendyolNotionCreateProduct,
+} from "./notion";
 // import * as ExcelJS from "exceljs";
 
 registerPrompt("search-list", require("inquirer-search-list"));
 registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 
-// Questions collection
-const promptQuestions: QuestionCollection = [
-  {
-    type: "input",
-    name: "title",
-    message: "Ürün adı yazınız",
-    filter: (input) => {
-      return capitalizeLetters(cleanUp(input));
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "phoneType",
-    message: "Telefonun bilinen adı yazınız",
-    filter: (input) => {
-      return cleanUp(input, false);
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-
-  {
-    type: "search-checkbox",
-    name: "phonesList",
-    message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
-    choices: phonesT,
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "mainModalCode",
-    message: "Ana model kodu yazınız",
-    filter: (input) => {
-      return cleanUp(input).toUpperCase();
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "brand",
-    message: "Marka adı yazınız",
-    // validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "colors",
-    message: "Renkleri yazınız (aralarında virgül koyarak)",
-    filter: (input) => {
-      return cleanUp(input)
-        .split(",")
-        .map((colorAnswer) => {
-          // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
-          return capitalizeLetters(colorAnswer);
-        });
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "globalPrice",
-    message: "Piyasa fiyatı yazınız",
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "price",
-    message: "Trendyol satış fiyatı yazınız",
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "stock",
-    message: "Stock adedi yazınız",
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "description",
-    message: "Ürün açıklaması yazınız",
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "material",
-    message: "Materyal seçiniz",
-    choices: materialsT,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "caseType",
-    message: "Kılıf modeli seçiniz",
-    choices: casesTypesT,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "guaranteePeriod",
-    message: "Garanti süresi seçiniz",
-    choices: guaranteesPeriodT,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "caseBrand",
-    message: "Uyumlu marka seçiniz",
-    choices: caseBrandsT,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "path",
-    message: "Path?",
-    validate: lengthValidator,
-    suffix: ":",
-  },
-];
-
 async function main() {
   // Handling prompt
-  const res = await prompt(promptQuestions)
+  const res = await prompt(promptQuestionsT)
     .then((answers) => {
       return answers;
     })
@@ -176,7 +44,7 @@ main();
 
 // - Helpers
 
-function compile({
+async function compile({
   brand,
   caseBrand,
   caseType,
@@ -265,7 +133,57 @@ function compile({
       res.push(fields);
     }
   }
-  writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
+
+  try {
+    // Write to excel file
+    writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
+    // Create product (it's 1 product so it won't matter if it's the first product of the last one)
+    const productId = await trendyolNotionCreateProduct({
+      title: res[0]["Ürün Adı"],
+      price: convertToNumber(res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]),
+      piyasa: convertToNumber(
+        res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]
+      ),
+      mainModalCode: res[0]["Stok Kodu"],
+      description: res[0]["Ürün Açıklaması"],
+    });
+
+    const currentModelCode: {
+      relation: string | null;
+      modelCode: string | null;
+    } = { relation: null, modelCode: null };
+    // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
+    // null !== "SB-11" => True
+    // "SB-11" !== "SB-11" => False
+    // "SB-11" !== "SB-12" => True
+    // TODO: I'm sure there is better way with guard clause
+
+    res.map(async (obj) => {
+      if (currentModelCode.modelCode !== obj["Model Kodu"]) {
+        const modelId = await trendyolNotionCreateModelCode({
+          modelCode: obj["Model Kodu"],
+          relationId: productId,
+        });
+
+        currentModelCode.modelCode = obj["Model Kodu"];
+        currentModelCode.relation = modelId;
+
+        await trendyolNotionCreateBarcode({
+          barcode: obj["Barkod"],
+          relationId: modelId,
+        });
+      } else {
+        trendyolNotionCreateBarcode({
+          barcode: obj["Barkod"],
+          // This will definitely not run on the first time
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          relationId: currentModelCode.relation!,
+        });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function replaceTurkishI(text: string) {
