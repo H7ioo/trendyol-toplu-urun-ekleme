@@ -28,11 +28,7 @@ Last prompt is path, you need to paste folder path so it creates the file there.
     - Starbucks Sulu Kılıf ✅
     - iPhone 11 Uyumlu Starbucks Sulu Kılıf ❌
 2.  "Telefonun bilinen adı yazınız" should contain the same words with the phone model.
-<<<<<<< HEAD
-    - Telefonun bilinen adı: Samsung. Telefon modelli: Samsung A10 ✅
-=======
     - Telefonun bilinen adı: Samsung. Telefon modelli: Samsung A10 ✅ 
->>>>>>> c7050ec50e84cf44315ea5a81ea6f9deba19ed59
     - Telefonun bilinen adı: Samsung Galaxy. Telefon modelli: Samsung A10 ❌
     ![CLI example image](https://i.imgur.com/FzCMB0h.png)
 3.  "Ürün açıklaması" should be HTML
