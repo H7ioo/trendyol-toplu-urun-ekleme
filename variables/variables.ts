@@ -9,12 +9,12 @@ export const KDVT = ["0", "1", "8", "18"] as const;
 
 // Available Material Types
 export const materialsT = [
+  "Silikon",
+  "Plastik",
   "Hakiki Deri",
   "Mantar Derisi",
-  "Plastik",
-  "Polyester",
-  "Silikon",
   "Suni Deri",
+  "Polyester",
 ] as const;
 
 // Available Types of Phone Cases
@@ -22,13 +22,13 @@ export const casesTypesT = ["Arka Kapak", "Cüzdan Kılıf", "Çerçeve"] as con
 
 // Garanti for The Phone Case
 export const guaranteesPeriodT = [
+  "Belirtilmemiş",
+  "6 Ay",
   "1 Yıl",
   "2 Yıl",
   "3 Yıl",
   "4 Yıl",
   "5 Yıl",
-  "6 Ay",
-  "Belirtilmemiş",
 ] as const;
 
 export const phonesT = [
@@ -800,6 +800,8 @@ export const phonesT = [
 
 export const caseBrandsT = [
   "Apple",
+  "Xiaomi",
+  "Samsung",
   "Belirtilmemiş",
   "Casper",
   "General Mobile",
@@ -808,8 +810,6 @@ export const caseBrandsT = [
   "Oppo",
   "POCO",
   "Reeder",
-  "Samsung",
-  "Xiaomi",
 ] as const;
 
 // ########################## HEPSIBURADA
@@ -818,21 +818,30 @@ export const KDVH = ["0", "1", "8", "18"] as const;
 
 // Available Material Types
 export const materialsH = [
-  "0.3mm Silikon",
+  "Silikon",
   "Ahşap",
+  "Aynalı",
+  "Aynalı Desenli - Cam",
+  "Cam",
+  "Cam - Silikon",
+  "Deri",
+  "Gerçek Deri",
+  "Mika",
+  "Sert Mika",
+  "Plastik",
+  "Sert Plastik",
+  "Sert Plastik Kapak",
+  "Sert Silikon",
+  "Şeffaf",
+  // ----
+  "0.3mm Silikon",
   "Air Slim Silikon",
   "Altın",
   "Alüminyum",
-  "Aynalı",
-  "Aynalı Desenli - Cam",
   "Beyaz - Gold",
-  "Cam",
-  "Cam - Silikon",
   "Cam Tozu",
-  "Deri",
   "Eva",
   "Flex",
-  "Gerçek Deri",
   "Gümüş",
   "Kapaklı Kılıf",
   "Karbonfiber",
@@ -844,7 +853,6 @@ export const materialsH = [
   "Kılıf",
   "Likit",
   "Metal",
-  "Mika",
   "Mıknatıs",
   "Nano Cam",
   "Neopren",
@@ -854,7 +862,6 @@ export const materialsH = [
   "PU Deri",
   "PVC",
   "Pencereli Kılıflar",
-  "Plastik",
   "Polikarbon",
   "Polikarbonat",
   "Polimer",
@@ -864,37 +871,30 @@ export const materialsH = [
   "Recycled",
   "Rubber",
   "Safir Silikon",
-  "Sert Mika",
-  "Sert Plastik",
-  "Sert Plastik Kapak",
-  "Sert Silikon",
   "Sierra Mavisi",
-  "Silikon",
   "Suni Deri",
   "Süet",
   "TPU",
   "Tempered Cam",
   "Termoplastik Poliüretan",
   "Thermoplastic",
-  "Şeffaf",
 ] as const;
 
 // Available Types of Phone Cases
 export const casesTypesH = [
-  "Aksesuar",
-  "Ara Kapak",
   "Arka Kapak",
   "Arka Kılıf",
   "Askılı Kılıf",
   "Ekran Koruyucu",
+  "Ara Kapak",
   "Kapaklı Kılıf",
   "Kese",
   "Kol Bandı",
   "Sticker",
   "Çerçeve",
+  "Aksesuar",
 ] as const;
 
-// Galaxy doesn't exist aghhh...
 export const phonesH = [
   "Galaxy  M01 Core",
   "Galaxy 21S",
@@ -2420,6 +2420,26 @@ export const crapH = [
 ] as const;
 
 export const colorsH = [
+  "Siyah",
+  "Beyaz",
+  "Pembe",
+  "Pudra",
+  "Pudra Pembe",
+  "Mor",
+  "Lila",
+  "Mavi",
+  "Su Yeşili",
+  "Turkuaz",
+
+  "Gold",
+  "Gümüş",
+  "Rose",
+
+  "Simli",
+  "Renkli",
+  "Renksiz",
+
+  // ---
   "Altın",
   "--",
   "41S-Sarı",
@@ -2498,7 +2518,6 @@ export const colorsH = [
   "Bej - Sarı",
   "Beril",
   "Berry",
-  "Beyaz",
   "Beyaz - Altın - Siyah",
   "Beyaz - Fuşya",
   "Beyaz - Gri",
@@ -2594,7 +2613,6 @@ export const colorsH = [
   "Glossy Finish Clear",
   "Glossy Finish Purple",
   "Glossy Finish Red",
-  "Gold",
   "Gold - Koyu Pembe",
   "Gold - Kırmızı",
   "Gold-Siyah",
@@ -2634,7 +2652,6 @@ export const colorsH = [
   "Gül Kurusu",
   "Gül Pembesi",
   "Gül Rengi",
-  "Gümüş",
   "Gümüş - Altın",
   "Gümüş - Beyaz",
   "Gümüş - Gri",
@@ -2795,7 +2812,6 @@ export const colorsH = [
   "Leylak",
   "Leylak Moru",
   "Light Silver",
-  "Lila",
   "Lila - Açık Mavi",
   "Lila - Bej",
   "Lila - Beyaz",
@@ -2819,7 +2835,6 @@ export const colorsH = [
   "Mat Şeffaf",
   "Matcha Yeşili",
   "Matte Finish Black",
-  "Mavi",
   "Mavi - Altın",
   "Mavi - Beyaz",
   "Mavi - Fuşya",
@@ -2863,7 +2878,6 @@ export const colorsH = [
   "Mint Yeşili",
   "Mint Yeşili - Kırmızı",
   "Monaco Blue",
-  "Mor",
   "Mor - Altın",
   "Mor - Açık Pembe",
   "Mor - Açık Yeşil",
@@ -2927,7 +2941,6 @@ export const colorsH = [
   "Pastel Sarı",
   "Pastel Yeşil",
   "Pebble",
-  "Pembe",
   "Pembe - Altın",
   "Pembe - Açık Mavi",
   "Pembe - Açık Mor",
@@ -2967,13 +2980,8 @@ export const colorsH = [
   "Platin Gri - Altın",
   "Platin Gri - Gümüş",
   "Portakal",
-  "Pudra",
-  "Pudra Pembe",
   "Red",
-  "Renkli",
-  "Renksiz",
   "Retro Yeşil",
-  "Rose",
   "Rose - Açık Mavi",
   "Rose - Gold",
   "Rose - Kırmızı",
@@ -3020,9 +3028,7 @@ export const colorsH = [
   "Shine Gold",
   "Sierra Mavisi",
   "Silver",
-  "Simli",
   "Simli Şeffaf",
-  "Siyah",
   "Siyah - Altın",
   "Siyah - Açık Kırmızı",
   "Siyah - Açık Mavi",
@@ -3074,7 +3080,6 @@ export const colorsH = [
   "Stand White",
   "Steel Silver",
   "Stone",
-  "Su Yeşili",
   "Sıcak Pembe",
   "TAN",
   "Taba",
@@ -3093,7 +3098,6 @@ export const colorsH = [
   "Totem",
   "Toz Pembe",
   "Transparan",
-  "Turkuaz",
   "Turkuaz - Beyaz",
   "Turkuaz - Beyaz - Açık Pembe",
   "Turkuaz - Beyaz - Yeşil",
@@ -3212,16 +3216,16 @@ export const colorsH = [
 
 export const caseBrandsH = [
   "Apple",
-  "General Mobile",
+  "Redmi",
+  "Samsung",
   "Huawei",
   "Infinix",
   "Omix",
   "Oppo",
+  "General Mobile",
   "Poco",
   "Realme",
-  "Redmi",
   "Reeder",
-  "Samsung",
   "Tecno",
   "iPhone",
 ] as const;
