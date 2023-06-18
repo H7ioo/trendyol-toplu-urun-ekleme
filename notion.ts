@@ -131,7 +131,7 @@ export const trendyolNotionCreateBarcode = async ({
   barcode,
   relationId,
 }: TrendyolNotionProps["createBarcode"]) => {
-  const modelObj: WithAuth<CreatePageParameters> = {
+  const barcodeObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.TRENDYOL_PRODUCT_BARCODE_DATABASE,
     },
@@ -153,8 +153,8 @@ export const trendyolNotionCreateBarcode = async ({
       },
     },
   };
-  const modelRes = await notion.pages.create(modelObj);
+  const barcodeRes = await notion.pages.create(barcodeObj);
 
-  const modelId = modelRes.id;
-  return modelId;
+  const barcodeId = barcodeRes.id;
+  return barcodeId;
 };

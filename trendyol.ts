@@ -6,6 +6,7 @@ import {
   convertToNumber,
   digitGen,
   removeWhiteSpaces,
+  sleep,
 } from "./helpers/utils";
 
 // import * as fs from "fs";
@@ -157,30 +158,32 @@ async function compile({
     // "SB-11" !== "SB-11" => False
     // "SB-11" !== "SB-12" => True
     // TODO: I'm sure there is better way with guard clause
+    // res.forEach(async (obj, index) => {
+    // });
 
-    res.map(async (obj) => {
+    for (let index = 0; index < res.length; index++) {
+      const obj = res[index];
       if (currentModelCode.modelCode !== obj["Model Kodu"]) {
         const modelId = await trendyolNotionCreateModelCode({
           modelCode: obj["Model Kodu"],
           relationId: productId,
         });
-
-        currentModelCode.modelCode = obj["Model Kodu"];
-        currentModelCode.relation = modelId;
-
         await trendyolNotionCreateBarcode({
           barcode: obj["Barkod"],
           relationId: modelId,
         });
+        currentModelCode.modelCode = obj["Model Kodu"];
+        currentModelCode.relation = modelId;
       } else {
-        trendyolNotionCreateBarcode({
+        await trendyolNotionCreateBarcode({
           barcode: obj["Barkod"],
           // This will definitely not run on the first time
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           relationId: currentModelCode.relation!,
         });
       }
-    });
+      await sleep(300);
+    }
   } catch (error) {
     console.log(error);
   }
