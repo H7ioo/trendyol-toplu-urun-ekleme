@@ -2,14 +2,21 @@ import { prompt, registerPrompt } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
+  convertToNumber,
   digitGen,
   removeWhiteSpaces,
+  sleep,
 } from "./helpers/utils";
 // import * as fs from "fs";
 import * as XLSX from "xlsx";
 import { KDVH } from "./variables/variables";
 import { promptAnswersH } from "./types/types";
 import { promptQuestionsH } from "./variables/prompts";
+import {
+  hepsiburadaNotionCreateBarcode,
+  hepsiburadaNotionCreateProduct,
+  hepsiburadaNotionCreateStockCode,
+} from "./notion";
 // import * as ExcelJS from "exceljs";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -34,9 +41,10 @@ async function main() {
   const result = res as promptAnswersH;
   compile(result);
 }
+
 main();
 
-function compile({
+async function compile({
   brand,
   caseBrand,
   caseType,
@@ -129,7 +137,31 @@ promptAnswersH) {
       }
     }
   }
-  writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
+  try {
+    writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
+    // Create product (it's 1 product so it won't matter if it's the first product of the last one)
+    const productId = await hepsiburadaNotionCreateProduct({
+      title: res[0]["Ürün Adı"],
+      price: convertToNumber(res[0]["Fiyat"]),
+      mainModalCode: mainModalCode,
+      description: res[0]["Ürün Açıklaması"],
+    });
+    for (let index = 0; index < res.length; index++) {
+      const obj = res[index];
+      await hepsiburadaNotionCreateStockCode({
+        stockCode: obj["Satıcı Stok Kodu"],
+        relationId: productId,
+      });
+      await sleep(200);
+      await hepsiburadaNotionCreateBarcode({
+        barcode: obj["Barkod"],
+        relationId: productId,
+      });
+      await sleep(200);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function replaceTurkishI(text: string) {

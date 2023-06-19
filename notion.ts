@@ -158,3 +158,140 @@ export const trendyolNotionCreateBarcode = async ({
   const barcodeId = barcodeRes.id;
   return barcodeId;
 };
+
+interface HepsiburadaNotionProps {
+  createProduct: {
+    // Product
+    title: string;
+    // ParseFloat() ! Trendyol uses . | Hepsiburada uses , .replace(/,/gi, ".")
+    price: number;
+    mainModalCode: string;
+    // Page Content
+    description: string;
+  };
+  createStockCode: {
+    stockCode: string;
+    relationId: string;
+  };
+  createBarcode: {
+    barcode: string;
+    relationId: string;
+  };
+}
+
+export const hepsiburadaNotionCreateProduct = async ({
+  title,
+  price,
+  mainModalCode,
+  description,
+}: HepsiburadaNotionProps["createProduct"]) => {
+  const productObj: WithAuth<CreatePageParameters> = {
+    parent: {
+      database_id: ENV.TRENDYOL_PRODUCT_DATABASE,
+    },
+    children: [
+      {
+        type: "heading_3",
+        heading_3: {
+          rich_text: [{ type: "text", text: { content: "Açıklama" } }],
+        },
+      },
+      {
+        type: "code",
+        code: {
+          rich_text: [{ type: "text", text: { content: description } }],
+          language: "html",
+        },
+      },
+    ],
+    properties: {
+      Name: {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: title,
+            },
+          },
+        ],
+      },
+      Fiyat: {
+        type: "number",
+        number: price,
+      },
+      "Satıcı kodu": {
+        type: "rich_text",
+        rich_text: [{ type: "text", text: { content: mainModalCode } }],
+      },
+    },
+  };
+  const productRes = await notion.pages.create(productObj);
+
+  const productId = productRes.id;
+  return productId;
+};
+
+export const hepsiburadaNotionCreateStockCode = async ({
+  stockCode,
+  relationId,
+}: HepsiburadaNotionProps["createStockCode"]) => {
+  const modelObj: WithAuth<CreatePageParameters> = {
+    parent: {
+      database_id: ENV.TRENDYOL_PRODUCT_MODAL_CODE_DATABASE,
+    },
+    properties: {
+      "Stok Kodu": {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: stockCode,
+            },
+          },
+        ],
+      },
+      Ürün: {
+        type: "relation",
+        relation: [{ id: relationId }],
+      },
+    },
+  };
+  const modelRes = await notion.pages.create(modelObj);
+
+  const modelId = modelRes.id;
+  return modelId;
+};
+
+export const hepsiburadaNotionCreateBarcode = async ({
+  barcode,
+  relationId,
+}: HepsiburadaNotionProps["createBarcode"]) => {
+  const barcodeObj: WithAuth<CreatePageParameters> = {
+    parent: {
+      database_id: ENV.TRENDYOL_PRODUCT_BARCODE_DATABASE,
+    },
+    properties: {
+      Barkod: {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: barcode,
+            },
+          },
+        ],
+      },
+      Ürün: {
+        type: "relation",
+        relation: [{ id: relationId }],
+      },
+    },
+  };
+  const barcodeRes = await notion.pages.create(barcodeObj);
+
+  const barcodeId = barcodeRes.id;
+  return barcodeId;
+};
