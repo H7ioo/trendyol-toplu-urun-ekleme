@@ -140,7 +140,7 @@ async function compile({
     writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
     // Create product (it's 1 product so it won't matter if it's the first product of the last one)
     const productId = await trendyolNotionCreateProduct({
-      title: res[0]["Ürün Adı"],
+      title: title,
       price: convertToNumber(res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]),
       piyasa: convertToNumber(
         res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]
