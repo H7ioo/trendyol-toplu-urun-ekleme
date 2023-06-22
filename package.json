@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "config": "ts-node config.ts",
     "t": "ts-node trendyol.ts",
     "h": "ts-node hepsiburada.ts",
     "test": "ts-node notion.ts"

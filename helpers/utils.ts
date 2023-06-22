@@ -57,7 +57,7 @@ export function digitGen(length: number) {
 /**
  * It validates the string or the array. It checks if the length is bigger than zero. Since split returns [''], we need to check multiple times for the Array
  * @param text The text.
- * @returns
+ * @returns true if the string is longer than zero
  */
 export function lengthValidator(text: string | string[]) {
   if (Array.isArray(text))
@@ -74,4 +74,29 @@ export function convertToNumber(value: string, float = true) {
   const v = value.replace(/,/gi, ".");
   if (float) return parseFloat(v);
   return parseInt(v);
+}
+
+// I didn't bother, it's from ChatGPT
+// TODO: add it to inqurier
+export function convertPath(path: string) {
+  // Remove extra slashes and replace them with a single slash
+  const cleanedPath = path.replace(/\/+/g, "/");
+
+  // Split the path into individual segments
+  const segments = cleanedPath.split("/");
+
+  // Remove empty segments
+  const filteredSegments = segments.filter((segment) => segment !== "");
+
+  // Join the segments with double backslashes
+  const convertedPath = filteredSegments.join("\\");
+
+  // Add the drive letter and trailing backslash
+  return (
+    convertedPath.charAt(0).toUpperCase() +
+    ":" +
+    "\\" +
+    convertedPath.slice(1) +
+    "\\"
+  );
 }

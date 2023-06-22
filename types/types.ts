@@ -14,6 +14,11 @@ import {
   materialsT,
 } from "../variables/variables";
 
+import configFileObject from "../config.json";
+export type ConfigFileObjectType = typeof configFileObject;
+
+export type ConfigFileKeys = keyof ConfigFileObjectType;
+
 export interface promptAnswersT {
   title: string;
   phoneType: string;
