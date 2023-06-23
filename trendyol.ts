@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { prompt, registerPrompt } from "inquirer";
+import { Question, QuestionCollection, prompt, registerPrompt } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
   convertToNumber,
   digitGen,
+  lengthValidator,
   removeWhiteSpaces,
   sleep,
 } from "./helpers/utils";
+import configFileObject from "./config.json";
 
 // import * as fs from "fs";
 import * as XLSX from "xlsx";
@@ -26,7 +28,7 @@ registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 
 async function main() {
   // Handling prompt
-  const res = await prompt(promptQuestionsT)
+  const res = await prompt(promptQuestionsT(configFileObject))
     .then((answers) => {
       return answers;
     })
@@ -154,7 +156,7 @@ async function compile({
       modelCode: string | null;
     } = { relation: null, modelCode: null };
     // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
-    // null !== "SB-11" => True
+    // null !== "SB-11" => TruFe
     // "SB-11" !== "SB-11" => False
     // "SB-11" !== "SB-12" => True
     // TODO: I'm sure there is better way with guard clause
@@ -248,3 +250,6 @@ function writeToExcel(
   //   'Yardım'
   // ]
 }
+
+// TODO: Sometimes I need to stop Notion.
+// TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli

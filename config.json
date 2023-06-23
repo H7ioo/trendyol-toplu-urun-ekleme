@@ -1,6 +1,10 @@
 {
   "path": {
     "message": "Specify folder path.",
+    "value": "C:\\Users\\omarj\\Downloads"
+  },
+  "alwaysRunNotion": {
+    "message": "Run notion on each run.",
     "value": null
   }
 }

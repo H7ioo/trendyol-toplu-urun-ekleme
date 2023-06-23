@@ -1,6 +1,6 @@
 // ############ Imports
 import { Question, prompt } from "inquirer";
-import { lengthValidator } from "./helpers/utils";
+import { cleanUp, lengthValidator, writeToJSONConfig } from "./helpers/utils";
 import configFileObject from "./config.json";
 import { ConfigFileKeys } from "./types/types";
 
@@ -33,7 +33,7 @@ import { ConfigFileKeys } from "./types/types";
           if (lengthValidator(input)) {
             switch (key) {
               case "path":
-                return input.replace(/"/gi, "");
+                return cleanUp(input.replace(/"/gi, ""), false);
               default:
                 break;
             }
@@ -47,5 +47,9 @@ import { ConfigFileKeys } from "./types/types";
   );
 
   const response = await prompt(configPromptArray);
-  console.log(response);
+  Object.keys(response).map((_) => {
+    const key = _ as ConfigFileKeys;
+    configFileObject[key].value = response[key];
+  });
+  writeToJSONConfig(JSON.stringify(configFileObject));
 })();
