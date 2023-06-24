@@ -1,10 +1,14 @@
 {
-  "path": {
-    "message": "Specify folder path.",
-    "value": "C:\\Users\\omarj\\Downloads"
+  "askToRunNotion": {
+    "name": "askToRunNotion",
+    "message": "^Ask to run notion",
+    "value": true,
+    "type": "confirm"
   },
-  "alwaysRunNotion": {
-    "message": "Run notion on each run.",
-    "value": null
+  "path": {
+    "name": "path",
+    "message": "^Specify folder path",
+    "value": null,
+    "type": "input"
   }
 }

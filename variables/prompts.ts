@@ -1,10 +1,4 @@
-import {
-  ListQuestion,
-  Question,
-  QuestionAnswer,
-  QuestionCollection,
-  QuestionMap,
-} from "inquirer";
+import { QuestionCollection } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
@@ -146,11 +140,19 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     },
     {
       type: "input",
-      name: "path",
-      message: "Path",
+      name: data.path.name,
+      message: data.path.message,
       validate: lengthValidator,
       suffix: ":",
       default: data.path.value ?? undefined,
+    },
+    {
+      type: "confirm",
+      name: data.askToRunNotion.name,
+      message: data.askToRunNotion.message,
+      validate: lengthValidator,
+      suffix: ":",
+      when: data.askToRunNotion.value ?? true,
     },
   ];
 

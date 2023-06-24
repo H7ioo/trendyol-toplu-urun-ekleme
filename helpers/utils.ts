@@ -112,3 +112,5 @@ export const writeToJSONConfig = (objStringify: string) => {
   });
   JSON.stringify;
 };
+
+export const pathRegex = new RegExp(/^[a-zA-Z]:\\(\w+\\)*\w*$/, "i");

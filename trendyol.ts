@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Question, QuestionCollection, prompt, registerPrompt } from "inquirer";
+import { prompt, registerPrompt } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
   convertToNumber,
   digitGen,
-  lengthValidator,
   removeWhiteSpaces,
   sleep,
 } from "./helpers/utils";
