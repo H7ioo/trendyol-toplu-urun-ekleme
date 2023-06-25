@@ -1,17 +1,18 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-import { prompt, registerPrompt } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
   convertToNumber,
   digitGen,
+  registerPrompts,
   removeWhiteSpaces,
+  replaceTurkishI,
+  showPrompt,
   sleep,
+  writeToExcel,
 } from "./helpers/utils";
 import configFileObject from "./config/config.json";
 
 // import * as fs from "fs";
-import * as XLSX from "xlsx";
 import { KDVT, categoryT, currencyT } from "./variables/variables";
 import { promptAnswersT } from "./types/types";
 import { promptQuestionsT } from "./variables/prompts";
@@ -22,29 +23,14 @@ import {
 } from "./lib/notion";
 // import * as ExcelJS from "exceljs";
 
-registerPrompt("search-list", require("inquirer-search-list"));
-registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
+registerPrompts();
 
-async function main() {
-  // Handling prompt
-  const res = await prompt(promptQuestionsT(configFileObject))
-    .then((answers) => {
-      return answers;
-    })
-    .catch((error) => {
-      if (error.isTtyError) {
-        console.log(error.isTtyError);
-        // Prompt couldn't be rendered in the current environment
-      } else {
-        console.log(error);
-        // Something else went wrong
-      }
-    });
-  //
-  const result = res as promptAnswersT;
+(async () => {
+  const result = (await showPrompt(
+    promptQuestionsT(configFileObject)
+  )) as promptAnswersT;
   compile(result);
-}
-main();
+})();
 
 // - Helpers
 
@@ -142,7 +128,13 @@ async function compile({
 
   try {
     // Write to excel file
-    writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
+    writeToExcel(
+      res,
+      cleanUp(path, false).replace(/"/gi, ""),
+      mainModalCode,
+      caseBrand,
+      "trendyol"
+    );
 
     if (!askToRunNotion) return;
     // Create product (it's 1 product so it won't matter if it's the first product of the last one)
@@ -194,69 +186,9 @@ async function compile({
   }
 }
 
-function replaceTurkishI(text: string) {
-  return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
-}
-
-function writeToExcel(
-  resultArray: object[],
-  path: string,
-  mainModalCode: string
-) {
-  const sheetName = "Ürünlerinizi Burada Listeleyin";
-  // Read the file into memory
-  const workbook = XLSX.readFile("./xlsx/trendyol.xlsx");
-
-  // Convert the XLSX to JSON
-  type worksheetsType = {
-    [key: string]: object[];
-  };
-  const worksheets: worksheetsType = {};
-  for (const sheetName of workbook.SheetNames) {
-    // Some helper functions in XLSX.utils generate different views of the sheets:
-    //     XLSX.utils.sheet_to_csv generates CSV
-    //     XLSX.utils.sheet_to_txt generates UTF16 Formatted Text
-    //     XLSX.utils.sheet_to_html generates HTML
-    //     XLSX.utils.sheet_to_json generates an array of objects
-    //     XLSX.utils.sheet_to_formulae generates a list of formulae
-    worksheets[sheetName] = XLSX.utils.sheet_to_json(
-      workbook.Sheets[sheetName]
-    );
-    // console.log(XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]));
-  }
-
-  // Show the data as JSON
-  // console.log(
-  //   "json:\n",
-  //   JSON.stringify(worksheets["Ürünlerinizi Burada Listeleyin"]),
-  //   "\n\n"
-  // );
-
-  // console.log(worksheets["Ürünlerinizi Burada Listeleyin"][0]);
-
-  // Modify the XLSX
-  worksheets[sheetName].push(...resultArray);
-
-  // Update the XLSX file
-  // XLSX.utils.sheet_add_json(workbook.Sheets[sheetName], worksheets[sheetName]);
-  // XLSX.writeFile(workbook, path);
-
-  // Create a new XLSX file
-  const newBook = XLSX.utils.book_new();
-  const newSheet = XLSX.utils.json_to_sheet(worksheets[sheetName]);
-  XLSX.utils.book_append_sheet(newBook, newSheet, sheetName);
-  XLSX.writeFile(newBook, `${path}\\${mainModalCode}-trendyol.xlsx`);
-
-  // [
-  //   'Ürünlerinizi Burada Listeleyin',
-  //   'Urun_Ozellik_Bilgileri',
-  //   'Yardım'
-  // ]
-}
-
-// TODO: Sometimes I need to stop Notion.
 // TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli
 // TODO: Pack of phones in the config file
 // TODO: Count of phones selected
 // TODO: Add second message to the config.json
 // TODO: Merge phones in one list => iPhone 11: {hepsiburada: "iPhone 11", trendyol: "iphone 11"}
+// TODO: Add an option to create a new product or add to existing product

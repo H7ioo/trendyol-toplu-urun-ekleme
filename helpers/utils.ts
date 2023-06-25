@@ -1,4 +1,5 @@
 import fs from "fs";
+import { QuestionCollection, prompt, registerPrompt } from "inquirer";
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -114,3 +115,90 @@ export const writeToJSONConfig = (objStringify: string) => {
 };
 
 export const pathRegex = new RegExp(/^[a-zA-Z]:\\(\w+\\)*\w*$/, "i");
+
+export function replaceTurkishI(text: string) {
+  return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
+}
+
+import * as XLSX from "xlsx";
+
+export function writeToExcel(
+  resultArray: object[],
+  path: string,
+  mainModalCode: string,
+  caseBrand: string,
+  company: "trendyol" | "hepsiburada"
+) {
+  const sheetName = "Ürünlerinizi Burada Listeleyin";
+  // Read the file into memory
+  const workbook = XLSX.readFile(`./xlsx/${company}.xlsx`);
+
+  // Convert the XLSX to JSON
+  type worksheetsType = {
+    [key: string]: object[];
+  };
+  const worksheets: worksheetsType = {};
+  for (const sheetName of workbook.SheetNames) {
+    // Some helper functions in XLSX.utils generate different views of the sheets:
+    //     XLSX.utils.sheet_to_csv generates CSV
+    //     XLSX.utils.sheet_to_txt generates UTF16 Formatted Text
+    //     XLSX.utils.sheet_to_html generates HTML
+    //     XLSX.utils.sheet_to_json generates an array of objects
+    //     XLSX.utils.sheet_to_formulae generates a list of formulae
+    worksheets[sheetName] = XLSX.utils.sheet_to_json(
+      workbook.Sheets[sheetName]
+    );
+    // console.log(XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]));
+  }
+
+  // Show the data as JSON
+  // console.log(
+  //   "json:\n",
+  //   JSON.stringify(worksheets["Ürünlerinizi Burada Listeleyin"]),
+  //   "\n\n"
+  // );
+
+  // console.log(worksheets["Ürünlerinizi Burada Listeleyin"][0]);
+
+  // Modify the XLSX
+  worksheets[sheetName].push(...resultArray);
+
+  // Update the XLSX file
+  // XLSX.utils.sheet_add_json(workbook.Sheets[sheetName], worksheets[sheetName]);
+  // XLSX.writeFile(workbook, path);
+
+  // Create a new XLSX file
+  const newBook = XLSX.utils.book_new();
+  const newSheet = XLSX.utils.json_to_sheet(worksheets[sheetName]);
+  XLSX.utils.book_append_sheet(newBook, newSheet, sheetName);
+  XLSX.writeFile(
+    newBook,
+    `${path}\\${caseBrand}-${mainModalCode}-${company}.xlsx`
+  );
+
+  // [
+  //   'Ürünlerinizi Burada Listeleyin',
+  //   'Urun_Ozellik_Bilgileri',
+  //   'Yardım'
+  // ]
+}
+
+export async function showPrompt(questionsCollection: QuestionCollection) {
+  const result = await prompt(questionsCollection).catch((error) => {
+    if (error.isTtyError) {
+      console.log(error.isTtyError);
+      // Prompt couldn't be rendered in the current environment
+    } else {
+      console.log(error);
+      // Something else went wrong
+    }
+  });
+  return result;
+}
+
+export function registerPrompts() {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  registerPrompt("search-list", require("inquirer-search-list"));
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
+}
