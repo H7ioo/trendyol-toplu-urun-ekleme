@@ -12,7 +12,6 @@ import {
 } from "./helpers/utils";
 import configFileObject from "./config/config.json";
 
-// import * as fs from "fs";
 import { KDVT, categoryT, currencyT } from "./variables/variables";
 import { promptAnswersT } from "./types/types";
 import { promptQuestionsT } from "./variables/prompts";
@@ -21,10 +20,8 @@ import {
   trendyolNotionCreateModelCode,
   trendyolNotionCreateProduct,
 } from "./lib/notion";
-// import * as ExcelJS from "exceljs";
 
 registerPrompts();
-
 (async () => {
   const result = (await showPrompt(
     promptQuestionsT(configFileObject)

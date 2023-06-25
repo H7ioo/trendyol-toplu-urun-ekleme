@@ -104,6 +104,10 @@ export function convertPath(path: string) {
   );
 }
 
+/**
+ * It writes to JSON file with fs.writeFile
+ * @param objStringify the new JSON object
+ */
 export const writeToJSONConfig = (objStringify: string) => {
   // ! The path is dependent on where is the function called from. Remove the ./ if you want to make it accessible from everywhere
   fs.writeFile("../config/config.json", objStringify, "utf8", (err) => {
@@ -114,8 +118,15 @@ export const writeToJSONConfig = (objStringify: string) => {
   JSON.stringify;
 };
 
+/**
+ * Regex for folder path
+ * @example pathRegex.test("C:\\ILoveMyMom")
+ */
 export const pathRegex = new RegExp(/^[a-zA-Z]:\\(\w+\\)*\w*$/, "i");
 
+/**
+ * Replaces Turkish weird I letter with English I letter
+ */
 export function replaceTurkishI(text: string) {
   return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
 }
@@ -183,6 +194,11 @@ export function writeToExcel(
   // ]
 }
 
+/**
+ * It shows a prompt
+ * @param questionsCollection Question Collection
+ * @returns Answers result
+ */
 export async function showPrompt(questionsCollection: QuestionCollection) {
   const result = await prompt(questionsCollection).catch((error) => {
     if (error.isTtyError) {
@@ -196,6 +212,9 @@ export async function showPrompt(questionsCollection: QuestionCollection) {
   return result;
 }
 
+/**
+ * Registers the prompts
+ */
 export function registerPrompts() {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   registerPrompt("search-list", require("inquirer-search-list"));

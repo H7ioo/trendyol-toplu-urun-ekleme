@@ -80,4 +80,3 @@ import { ConfigFileKeys } from "../types/types";
 })();
 
 // TODO: No null on confirm, can not get reset
-// 2 choices trendyol or hepsiburada => show a list
