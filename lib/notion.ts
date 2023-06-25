@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client";
 
 import { WithAuth } from "@notionhq/client/build/src/Client";
 import { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
-import { ENV } from "./env";
+import { ENV } from "../helpers/env";
 
 const notion = new Client({
   auth: ENV.NOTION_TOKEN,

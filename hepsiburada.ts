@@ -16,7 +16,7 @@ import {
   hepsiburadaNotionCreateBarcode,
   hepsiburadaNotionCreateProduct,
   hepsiburadaNotionCreateStockCode,
-} from "./notion";
+} from "./lib/notion";
 // import * as ExcelJS from "exceljs";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

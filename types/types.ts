@@ -14,7 +14,7 @@ import {
   materialsT,
 } from "../variables/variables";
 
-import configFileObject from "../config.json";
+import configFileObject from "../config/config.json";
 export type ConfigFileObjectType = typeof configFileObject;
 
 export type ConfigFileKeys = keyof ConfigFileObjectType;
@@ -35,6 +35,7 @@ export interface promptAnswersT {
   guaranteePeriod: (typeof guaranteesPeriodT)[number];
   caseBrand: (typeof caseBrandsT)[number];
   path: string;
+  askToRunNotion: boolean;
 }
 
 export interface promptAnswersH {
@@ -66,3 +67,5 @@ export interface promptAnswersH {
   phoneType: string;
   path: string;
 }
+
+// TODO: Dynamic Types Extends

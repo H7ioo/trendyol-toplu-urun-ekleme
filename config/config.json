@@ -8,7 +8,13 @@
   "path": {
     "name": "path",
     "message": "^Specify folder path",
-    "value": null,
+    "value": "c:\\users\\omarj\\downloads\\doing",
     "type": "input"
+  },
+  "usePhonesCollections": {
+    "name": "usePhonesCollections",
+    "message": "^Use phone collections",
+    "value": null,
+    "type": "confirm"
   }
 }

@@ -5,12 +5,13 @@ import {
   lengthValidator,
   pathRegex,
   writeToJSONConfig,
-} from "./helpers/utils";
-import configFileObject from "./config.json";
-import { ConfigFileKeys } from "./types/types";
+} from "../helpers/utils";
+import configFileObject from "../config/config.json";
+import { ConfigFileKeys } from "../types/types";
 
 (async () => {
   // Prompt Array
+  // TODO:
   const configPromptArray: Question[] = [];
 
   await Promise.all(
@@ -59,7 +60,7 @@ import { ConfigFileKeys } from "./types/types";
 
       // Push a question to the array
       configPromptArray.push({
-        type: value.type,
+        type: "number",
         name: key,
         message: value.message,
         // suffix: " (Atlamak için Enter tuşunu basınız.)",
@@ -79,3 +80,4 @@ import { ConfigFileKeys } from "./types/types";
 })();
 
 // TODO: No null on confirm, can not get reset
+// 2 choices trendyol or hepsiburada => show a list

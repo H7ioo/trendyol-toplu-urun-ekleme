@@ -8,7 +8,7 @@ import {
   removeWhiteSpaces,
   sleep,
 } from "./helpers/utils";
-import configFileObject from "./config.json";
+import configFileObject from "./config/config.json";
 
 // import * as fs from "fs";
 import * as XLSX from "xlsx";
@@ -19,7 +19,7 @@ import {
   trendyolNotionCreateBarcode,
   trendyolNotionCreateModelCode,
   trendyolNotionCreateProduct,
-} from "./notion";
+} from "./lib/notion";
 // import * as ExcelJS from "exceljs";
 
 registerPrompt("search-list", require("inquirer-search-list"));
@@ -33,8 +33,10 @@ async function main() {
     })
     .catch((error) => {
       if (error.isTtyError) {
+        console.log(error.isTtyError);
         // Prompt couldn't be rendered in the current environment
       } else {
+        console.log(error);
         // Something else went wrong
       }
     });
@@ -62,6 +64,7 @@ async function compile({
   stock,
   title,
   path,
+  askToRunNotion,
 }: promptAnswersT) {
   const res = [];
   for (let i = 0; i < phonesList.length; i++) {
@@ -73,6 +76,7 @@ async function compile({
     // );
     // - This works only if I wrote the phoneType the same as the phone brand written in the file
     // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung
+    // TODO: Replace words from array of words ["samsung", "galaxy"]
     const regex = new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
     // Example: 11 Pro
     const phoneNameWithoutBrand = capitalizeLetters(
@@ -139,13 +143,13 @@ async function compile({
   try {
     // Write to excel file
     writeToExcel(res, cleanUp(path, false).replace(/"/gi, ""), mainModalCode);
+
+    if (!askToRunNotion) return;
     // Create product (it's 1 product so it won't matter if it's the first product of the last one)
     const productId = await trendyolNotionCreateProduct({
       title: title,
       price: convertToNumber(res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]),
-      piyasa: convertToNumber(
-        res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]
-      ),
+      piyasa: convertToNumber(res[0]["Piyasa Satış Fiyatı (KDV Dahil)"]),
       mainModalCode: res[0]["Stok Kodu"],
       description: res[0]["Ürün Açıklaması"],
     });
@@ -252,3 +256,7 @@ function writeToExcel(
 
 // TODO: Sometimes I need to stop Notion.
 // TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli
+// TODO: Pack of phones in the config file
+// TODO: Count of phones selected
+// TODO: Add second message to the config.json
+// TODO: Merge phones in one list => iPhone 11: {hepsiburada: "iPhone 11", trendyol: "iphone 11"}
