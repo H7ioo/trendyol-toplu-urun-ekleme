@@ -58,8 +58,7 @@ async function compile({
     //   phonesList[i].split(" ").slice(1).join(" ")
     // );
     // - This works only if I wrote the phoneType the same as the phone brand written in the file
-    // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung
-    // TODO: Replace words from array of words ["samsung", "galaxy"]
+    // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
     const regex = new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
     // Example: 11 Pro
     const phoneNameWithoutBrand = capitalizeLetters(
@@ -151,9 +150,6 @@ async function compile({
     // null !== "SB-11" => TruFe
     // "SB-11" !== "SB-11" => False
     // "SB-11" !== "SB-12" => True
-    // TODO: I'm sure there is better way with guard clause
-    // res.forEach(async (obj, index) => {
-    // });
 
     for (let index = 0; index < res.length; index++) {
       const obj = res[index];
@@ -171,7 +167,7 @@ async function compile({
       } else {
         await trendyolNotionCreateBarcode({
           barcode: obj["Barkod"],
-          // This will definitely not run on the first time
+          // This will definitely will not run on the first time
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           relationId: currentModelCode.relation!,
         });
@@ -184,8 +180,9 @@ async function compile({
 }
 
 // TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli
-// TODO: Pack of phones in the config file
-// TODO: Count of phones selected
-// TODO: Add second message to the config.json
 // TODO: Merge phones in one list => iPhone 11: {hepsiburada: "iPhone 11", trendyol: "iphone 11"}
+// TODO: Pack of phones in the config file
+// TODO: Add second message to the config.json
+
 // TODO: Add an option to create a new product or add to existing product
+// - Query notion database => pass it to inq search list

@@ -1,5 +1,5 @@
-import fs from "fs";
 import { QuestionCollection, prompt, registerPrompt } from "inquirer";
+import fs from "fs";
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -80,7 +80,6 @@ export function convertToNumber(value: string, float = true) {
 }
 
 // I didn't bother, it's from ChatGPT
-// TODO: add it to inqurier
 export function convertPath(path: string) {
   // Remove extra slashes and replace them with a single slash
   const cleanedPath = path.replace(/\/+/g, "/");
@@ -96,11 +95,7 @@ export function convertPath(path: string) {
 
   // Add the drive letter and trailing backslash
   return (
-    convertedPath.charAt(0).toUpperCase() +
-    ":" +
-    "\\" +
-    convertedPath.slice(1) +
-    "\\"
+    convertedPath.charAt(0).toUpperCase() + ":" + convertedPath.slice(1) + "\\"
   );
 }
 

@@ -1,9 +1,12 @@
+import fs from "fs";
 import { QuestionCollection } from "inquirer";
 import {
   capitalizeLetters,
   cleanUp,
+  convertPath,
   lengthValidator,
   numberValidator,
+  pathRegex,
 } from "../helpers/utils";
 import {
   phonesT,
@@ -47,7 +50,10 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       name: "phonesList",
       message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
       choices: phonesT,
-      validate: lengthValidator,
+      validate: (input) => {
+        console.log(`Count: ${input.length}`);
+        return lengthValidator(input);
+      },
       suffix: ":",
     },
     {
@@ -142,7 +148,22 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       type: "input",
       name: data.path.name,
       message: data.path.message,
-      validate: lengthValidator,
+      validate: (input) => {
+        // Check for the length
+        if (lengthValidator(input)) {
+          // if it matches the regex continue
+          if (pathRegex.test(input) && fs.existsSync(input)) {
+            return true;
+          } else {
+            // Convert the path and try again
+            return (
+              pathRegex.test(convertPath(input)) &&
+              fs.existsSync(convertPath(input))
+            );
+          }
+        }
+        return false;
+      },
       suffix: ":",
       default: data.path.value ?? undefined,
     },
@@ -155,10 +176,6 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       when: data.askToRunNotion.value ?? true,
     },
   ];
-
-  // const modifiedPrompt: Question[] = [...(promptCollection as [])];
-
-  // // TODO: Check
 
   return promptCollection;
 };

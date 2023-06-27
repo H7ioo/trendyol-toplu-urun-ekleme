@@ -78,5 +78,3 @@ import { ConfigFileKeys } from "../types/types";
   });
   writeToJSONConfig(JSON.stringify(configFileObject));
 })();
-
-// TODO: No null on confirm, can not get reset
