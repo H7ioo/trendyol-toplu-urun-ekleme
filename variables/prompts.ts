@@ -20,7 +20,12 @@ import {
   casesTypesH,
   caseBrandsH,
 } from "./variables";
-import { ConfigFileObjectType } from "../types/types";
+import {
+  ConfigFileObjectType,
+  phonesCollectionPromptType,
+} from "../types/types";
+
+import phonesCollectionData from "../config/phonesCollections.json";
 
 // Questions collection
 export const promptQuestionsT = (data: ConfigFileObjectType) => {
@@ -304,6 +309,58 @@ export const promptQuestionsH: QuestionCollection = [
     name: "path",
     message: "Path?",
     validate: lengthValidator,
+    suffix: ":",
+  },
+];
+
+// TODO: Global it
+let createCollectionNameFlag = false;
+export const createCollectionPrompt: QuestionCollection = [
+  {
+    type: "list",
+    name: "company",
+    message: "Şirket seçiniz",
+    choices: ["trendyol", "hepsiburada"],
+    suffix: ":",
+  },
+  {
+    type: "search-checkbox",
+    name: "phonesCollection",
+    message: "Telefon modelleri seçiniz",
+    choices: (answers) => {
+      const company: phonesCollectionPromptType["company"] = answers.company;
+      if (company === "hepsiburada") return phonesH;
+      if (company === "trendyol") return phonesT;
+    },
+    validate: lengthValidator,
+    suffix: ":",
+  },
+  {
+    type: "input",
+    name: "collectionName",
+    message: "Koleksiyon adı yazınız",
+    validate: (input) => {
+      // Check for the length
+      if (lengthValidator(input)) {
+        // If there is a similar names throw a warning
+        const foundSimilarName = phonesCollectionData.phonesCollections.some(
+          (collection) => {
+            const c = collection as phonesCollectionPromptType;
+            // Set the flag to true if the user wants to override the existing fields
+            if (c.collectionName === input) return true;
+          }
+        );
+        // If the flag is true then override
+        if (createCollectionNameFlag === true) return true;
+        if (!foundSimilarName) {
+          return true;
+        } else {
+          createCollectionNameFlag = true;
+          return "Koleksiyon adı mevcut, farklı bir adı yazınız. Koleksiyonu değiştirmek için Enter basınız.";
+        }
+      }
+      return false;
+    },
     suffix: ":",
   },
 ];

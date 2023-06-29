@@ -12,6 +12,7 @@ import {
   casesTypesT,
   guaranteesPeriodT,
   materialsT,
+  phonesT,
 } from "../variables/variables";
 
 import configFileObject from "../config/config.json";
@@ -69,3 +70,9 @@ export interface promptAnswersH {
 }
 
 // TODO: Dynamic Types Extends
+
+export interface phonesCollectionPromptType {
+  company: "hepsiburada" | "trendyol";
+  phonesCollection: typeof phonesT | typeof phonesH;
+  collectionName: string;
+}

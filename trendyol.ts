@@ -186,3 +186,5 @@ async function compile({
 
 // TODO: Add an option to create a new product or add to existing product
 // - Query notion database => pass it to inq search list
+
+// TODO: Check if Main Code exists

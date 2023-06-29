@@ -7,6 +7,7 @@
     "config": "ts-node lib/config.ts",
     "t": "ts-node trendyol.ts",
     "h": "ts-node hepsiburada.ts",
+    "cc": "ts-node lib/createCollection.ts",
     "test": "ts-node notion.ts"
   },
   "keywords": [],

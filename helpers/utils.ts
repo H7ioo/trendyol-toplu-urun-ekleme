@@ -103,9 +103,10 @@ export function convertPath(path: string) {
  * It writes to JSON file with fs.writeFile
  * @param objStringify the new JSON object
  */
-export const writeToJSONConfig = (objStringify: string) => {
+export const writeToJSON = (obj: object, path: string) => {
+  const stringify = JSON.stringify(obj);
   // ! The path is dependent on where is the function called from. Remove the ./ if you want to make it accessible from everywhere
-  fs.writeFile("../config/config.json", objStringify, "utf8", (err) => {
+  fs.writeFile(path, stringify, "utf8", (err) => {
     if (err) {
       console.log(err);
     }

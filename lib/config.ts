@@ -4,7 +4,7 @@ import {
   cleanUp,
   lengthValidator,
   pathRegex,
-  writeToJSONConfig,
+  writeToJSON,
 } from "../helpers/utils";
 import configFileObject from "../config/config.json";
 import { ConfigFileKeys } from "../types/types";
@@ -76,5 +76,5 @@ import { ConfigFileKeys } from "../types/types";
     const key = _ as ConfigFileKeys;
     configFileObject[key].value = response[key];
   });
-  writeToJSONConfig(JSON.stringify(configFileObject));
+  writeToJSON(configFileObject, "../config/config.json");
 })();
