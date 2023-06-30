@@ -73,6 +73,6 @@ export interface promptAnswersH {
 
 export interface phonesCollectionPromptType {
   company: "hepsiburada" | "trendyol";
-  phonesCollection: typeof phonesT | typeof phonesH;
+  phonesCollection: (typeof phonesT)[number][] | (typeof phonesH)[number][];
   collectionName: string;
 }

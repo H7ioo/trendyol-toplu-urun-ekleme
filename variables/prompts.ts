@@ -364,3 +364,29 @@ export const createCollectionPrompt: QuestionCollection = [
     suffix: ":",
   },
 ];
+
+export const deleteCollectionPrompt: QuestionCollection = [
+  {
+    type: "search-checkbox",
+    name: "phonesCollections",
+    message: "Silmek istediğiniz koleksiyonları işaretleyiniz",
+    // Map over the collections and display them
+    choices: phonesCollectionData.phonesCollections.map((collection) => {
+      const c = collection as phonesCollectionPromptType;
+      return `${c.collectionName} => ${JSON.stringify(c.phonesCollection)}`;
+    }),
+    validate: lengthValidator,
+    // Filter the result to get only the name of the collection
+    filter: (input) => {
+      if (input.length) {
+        return input
+          .toString()
+          .split("],")
+          .map((value: string) => value.split(" =>")[0].trim());
+      } else {
+        return "";
+      }
+    },
+    suffix: ":",
+  },
+];

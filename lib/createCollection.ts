@@ -8,15 +8,7 @@ registerPrompts();
   const result = (await showPrompt(
     createCollectionPrompt
   )) as phonesCollectionPromptType;
-  // const obj = {
-  //   phonesCollections: [
-  //     ...phonesCollectionData.phonesCollections,
-  //     {
-  //       phonesCollection: result.phonesCollection,
-  //       collectionName: result.collectionName,
-  //     },
-  //   ],
-  // };
+
   // Loop over the phones if the name is the same override it
   let addNewObject = true;
   const array = phonesCollectionData.phonesCollections.map((collection) => {

@@ -11,7 +11,6 @@ import { ConfigFileKeys } from "../types/types";
 
 (async () => {
   // Prompt Array
-  // TODO:
   const configPromptArray: Question[] = [];
 
   await Promise.all(
