@@ -29,6 +29,7 @@ import phonesCollectionData from "../config/phonesCollections.json";
 
 // Questions collection
 export const promptQuestionsT = (data: ConfigFileObjectType) => {
+  const company = "trendyol";
   const promptCollection: QuestionCollection = [
     {
       type: "input",
@@ -51,10 +52,40 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       suffix: ":",
     },
     {
+      type: "confirm",
+      name: "useCollections",
+      message: "Koleksiyon kullanmak istiyor musunuz?",
+      suffix: ":",
+      when: phonesCollectionData.phonesCollections.length <= 0 ? false : true,
+    },
+    {
       type: "search-checkbox",
       name: "phonesList",
-      message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
-      choices: phonesT,
+      message: "Telefon modelleri seçiniz",
+      choices: (answers) => {
+        const onlyComponyArray = phonesCollectionData.phonesCollections.filter(
+          (collection) => {
+            const c = collection as phonesCollectionPromptType;
+            return c.company === company;
+          }
+        );
+        const collectionNames = onlyComponyArray.map((collection) => {
+          const c = collection as phonesCollectionPromptType;
+          return `${c.collectionName} => ${JSON.stringify(c.phonesCollection)}`;
+        });
+        return answers.useCollections ? collectionNames : phonesT;
+      },
+      filter: (input) => {
+        if (input.length) {
+          const stringArray = input
+            .toString()
+            .split(`, `)
+            .map((value: string) => value.split(`=> `)[1].trim());
+          return JSON.parse(stringArray);
+        } else {
+          return "";
+        }
+      },
       validate: (input) => {
         console.log(`Count: ${input.length}`);
         return lengthValidator(input);
@@ -379,10 +410,14 @@ export const deleteCollectionPrompt: QuestionCollection = [
     // Filter the result to get only the name of the collection
     filter: (input) => {
       if (input.length) {
-        return input
-          .toString()
-          .split("],")
-          .map((value: string) => value.split(" =>")[0].trim());
+        return (
+          input
+            .toString()
+            // TODO: TEST IT
+            // TODO: Might be a bug because the comma might not exist OLD => ],
+            .split(", ")
+            .map((value: string) => value.split(" =>")[0].trim())
+        );
       } else {
         return "";
       }
