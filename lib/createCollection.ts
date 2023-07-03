@@ -16,7 +16,7 @@ registerPrompts();
     if (c.collectionName === result.collectionName) {
       addNewObject = false;
       return {
-        collectionName: result.collectionName,
+        collectionName: result.collectionName.trim(),
         phonesCollection: result.phonesCollection,
         company: result.company,
       };
@@ -29,7 +29,7 @@ registerPrompts();
   // If we didn't override then add it to the array
   if (addNewObject)
     obj.phonesCollections.push({
-      collectionName: result.collectionName,
+      collectionName: result.collectionName.trim(),
       phonesCollection: result.phonesCollection,
       company: result.company,
     });

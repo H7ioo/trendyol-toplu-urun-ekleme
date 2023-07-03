@@ -51,46 +51,52 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       validate: lengthValidator,
       suffix: ":",
     },
-    {
-      type: "confirm",
-      name: "useCollections",
-      message: "Koleksiyon kullanmak istiyor musunuz? / N",
-      suffix: ":",
-      when: phonesCollectionData.phonesCollections.length <= 0 ? false : true,
-      default: false,
-    },
+
     {
       type: "search-checkbox",
-      name: "phonesList",
-      message: "Telefon modelleri seçiniz",
-      choices: (answers) => {
+      name: "phonesCollection",
+      message: "Telefon koleksiyonu seçiniz",
+      choices: () => {
+        // Get only t his company array (trendyol)
         const onlyComponyArray = phonesCollectionData.phonesCollections.filter(
           (collection) => {
             const c = collection as phonesCollectionPromptType;
             return c.company === company;
           }
         );
+        // Get all collection names and show an array with it
         const collectionNames = onlyComponyArray.map((collection) => {
           const c = collection as phonesCollectionPromptType;
           return `${c.collectionName} => ${JSON.stringify(c.phonesCollection)}`;
         });
-        return answers.useCollections ? collectionNames : phonesT;
+        return collectionNames;
       },
-      filter: (input, answers) => {
-        if (!answers.useCollections) return input;
-        if (input.length) {
-          const stringArray = input
-            .toString()
-            .split(`, `)
-            .map((value: string) => value.split(`=> `)[1].trim());
-          return JSON.parse(stringArray);
+      filter: (input: string[]) => {
+        if (lengthValidator(input)) {
+          // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
+          const collectionNames = input.map((collectionName) =>
+            collectionName.split(" =>")[0].trim()
+          );
+          const collections = phonesCollectionData.phonesCollections.filter(
+            (collection) => {
+              if (collectionNames.includes(collection.collectionName))
+                return true;
+            }
+          );
+          return collections.map((collection) => collection.phonesCollection);
         } else {
-          return "";
+          return [];
         }
       },
+      suffix: ":",
+    },
+    {
+      type: "search-checkbox",
+      name: "phonesList",
+      message: "Telefon modelleri seçiniz",
+      choices: phonesT,
       validate: (input) => {
         console.log(`Count: ${input.length}`);
-        // return lengthValidator(input);
         return true;
       },
       suffix: ":",
@@ -420,6 +426,7 @@ export const createCollectionPrompt: QuestionCollection = [
   },
 ];
 
+// TODO: Might have an error. Prefer to use another way from the TrendyolPrompt up there
 export const deleteCollectionPrompt: QuestionCollection = [
   {
     type: "search-checkbox",

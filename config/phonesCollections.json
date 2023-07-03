@@ -4,6 +4,11 @@
       "collectionName": "sadeiPhone",
       "phonesCollection": ["Iphone 11", "iPhone 12", "iPhone 13", "iPhone 14"],
       "company": "trendyol"
+    },
+    {
+      "collectionName": "sadeiPhone2",
+      "phonesCollection": ["Iphone 11", "iPhone 12", "iPhone 13", "iPhone 14"],
+      "company": "trendyol"
     }
   ]
 }

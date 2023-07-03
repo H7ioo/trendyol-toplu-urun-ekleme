@@ -221,6 +221,7 @@ interface InformationLoopType extends promptAnswersT {
   KDV: typeof KDVT;
   objectArray: object[];
   mainList: typeof phonesT;
+  mergedPhonesList: string[];
 }
 
 // Phone brand
@@ -229,7 +230,7 @@ export const removePhoneBrandRegEx = (phoneType: string) => {
 };
 
 export async function generateInformationLoop({
-  phonesList,
+  mergedPhonesList,
   phoneBrand,
   title,
   mainModalCode,
@@ -249,12 +250,12 @@ export async function generateInformationLoop({
   objectArray,
   mainList,
 }: InformationLoopType) {
-  for (let i = 0; i < phonesList.length; i++) {
+  for (let i = 0; i < mergedPhonesList.length; i++) {
     // - This works only if I wrote the phoneType the same as the phone brand written in the file
     // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
     const regex = removePhoneBrandRegEx(phoneBrand);
     // Example: Iphone 11 Pro (from Excel Sheet)
-    const phoneName = phonesList[i] as (typeof mainList)[number];
+    const phoneName = mergedPhonesList[i] as (typeof mainList)[number];
     // Example: 11 Pro
     const phoneNameWithoutBrand = capitalizeLetters(
       cleanUp(

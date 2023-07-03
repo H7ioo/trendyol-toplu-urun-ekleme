@@ -90,6 +90,7 @@ export interface promptAnswersT {
   path: string;
   askToRunNotion: boolean;
   writtenPhonesList: string[];
+  phonesCollection: phonesCollectionPromptType["phonesCollection"];
 }
 
 export interface promptAnswersH {

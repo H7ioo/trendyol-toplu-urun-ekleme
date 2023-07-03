@@ -36,19 +36,25 @@ async function compile(props: promptAnswersT) {
     caseBrand,
     title,
     writtenPhonesList,
+    phonesList,
+    phonesCollection,
   } = props;
 
+  const mergedPhonesList = [
+    ...writtenPhonesList,
+    ...phonesList,
+    ...phonesCollection,
+  ];
   const objectArray: TrendyolFields[] = [];
   generateInformationLoop({
     ...props,
+    mergedPhonesList,
     category: categoryT,
     currency: currencyT,
     KDV: KDVT,
     objectArray: objectArray,
     mainList: phonesT,
   });
-
-  console.log(writtenPhonesList);
 
   try {
     // Write to excel file
