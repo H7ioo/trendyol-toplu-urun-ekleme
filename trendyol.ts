@@ -1,19 +1,16 @@
 import {
-  capitalizeLetters,
   cleanUp,
   convertToNumber,
-  digitGen,
+  generateInformationLoop,
   registerPrompts,
-  removeWhiteSpaces,
-  replaceTurkishI,
   showPrompt,
   sleep,
   writeToExcel,
 } from "./helpers/utils";
 import configFileObject from "./config/config.json";
 
-import { KDVT, categoryT, currencyT } from "./variables/variables";
-import { promptAnswersT } from "./types/types";
+import { KDVT, categoryT, currencyT, phonesT } from "./variables/variables";
+import { TrendyolFields, promptAnswersT } from "./types/types";
 import { promptQuestionsT } from "./variables/prompts";
 import {
   trendyolNotionCreateBarcode,
@@ -31,101 +28,32 @@ registerPrompts();
 
 // - Helpers
 
-async function compile({
-  brand,
-  caseBrand,
-  caseType,
-  colors,
-  description,
-  globalPrice,
-  guaranteePeriod,
-  mainModalCode,
-  material,
-  phoneType,
-  phonesList,
-  price,
-  stock,
-  title,
-  path,
-  askToRunNotion,
-}: promptAnswersT) {
-  const res = [];
-  for (let i = 0; i < phonesList.length; i++) {
-    // Example: Iphone 11 Pro (from Excel Sheet)
-    const phoneName = phonesList[i];
-    // - This doesn't work on 2 words brand
-    // const phoneCode = capitalizeLetters(
-    //   phonesList[i].split(" ").slice(1).join(" ")
-    // );
-    // - This works only if I wrote the phoneType the same as the phone brand written in the file
-    // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
-    const regex = new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
-    // Example: 11 Pro
-    const phoneNameWithoutBrand = capitalizeLetters(
-      cleanUp(
-        replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
-        false
-      )
-    );
-    // Example: 11Pro
-    const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
-    // Example: iPhone 11 Pro Uyumlu I Love Your Mom
-    const productTitle = `${phoneType} ${phoneNameWithoutBrand} Uyumlu ${title}`;
-    // Example: SB-11Pro
-    const productModal = `${mainModalCode}-${phoneCode}`;
-    // Example: 691
-    const randomDigits = digitGen(3);
-    for (let j = 0; j < colors.length; j++) {
-      // Example: Kırmızı
-      const color = colors[j];
-      // Example: SuarSB-11ProSari-691
-      const barcode = `${capitalizeLetters(
-        brand ?? ""
-      )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+async function compile(props: promptAnswersT) {
+  const {
+    path,
+    askToRunNotion,
+    mainModalCode,
+    caseBrand,
+    title,
+    writtenPhonesList,
+  } = props;
 
-      // Fields
-      const fields = {
-        Barkod: barcode,
-        "Model Kodu": productModal,
-        Marka: brand ?? "",
-        Kategori: categoryT,
-        "Para Birimi": currencyT,
-        "Ürün Adı": productTitle,
-        "Ürün Açıklaması": description,
-        "Piyasa Satış Fiyatı (KDV Dahil)": globalPrice,
-        "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
-        "Ürün Stok Adedi": stock,
-        "Stok Kodu": mainModalCode,
-        "KDV Oranı": KDVT["3"],
-        Desi: "",
-        "Görsel 1": "",
-        "Görsel 2": "",
-        "Görsel 3": "",
-        "Görsel 4": "",
-        "Görsel 5": "",
-        "Görsel 6": "",
-        "Görsel 7": "",
-        "Görsel 8": "",
-        "Sevkiyat Süresi": "",
-        "Sevkiyat Tipi": "",
-        Renk: color,
-        Materyal: material,
-        Model: caseType,
-        "Cep Telefonu Modeli": phoneName,
-        "Garanti Tipi": "",
-        "Garanti Süresi": guaranteePeriod,
-        "Uyumlu Marka": caseBrand,
-      };
+  const objectArray: TrendyolFields[] = [];
+  generateInformationLoop({
+    ...props,
+    category: categoryT,
+    currency: currencyT,
+    KDV: KDVT,
+    objectArray: objectArray,
+    mainList: phonesT,
+  });
 
-      // Push to the array
-      res.push(fields);
-    }
-  }
+  console.log(writtenPhonesList);
 
   try {
     // Write to excel file
     writeToExcel(
-      res,
+      objectArray,
       cleanUp(path, false).replace(/"/gi, ""),
       mainModalCode,
       caseBrand,
@@ -136,10 +64,14 @@ async function compile({
     // Create product (it's 1 product so it won't matter if it's the first product of the last one)
     const productId = await trendyolNotionCreateProduct({
       title: title,
-      price: convertToNumber(res[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]),
-      piyasa: convertToNumber(res[0]["Piyasa Satış Fiyatı (KDV Dahil)"]),
-      mainModalCode: res[0]["Stok Kodu"],
-      description: res[0]["Ürün Açıklaması"],
+      price: convertToNumber(
+        objectArray[0]["Trendyol'da Satılacak Fiyat (KDV Dahil)"]
+      ),
+      piyasa: convertToNumber(
+        objectArray[0]["Piyasa Satış Fiyatı (KDV Dahil)"]
+      ),
+      mainModalCode: objectArray[0]["Stok Kodu"],
+      description: objectArray[0]["Ürün Açıklaması"],
     });
 
     const currentModelCode: {
@@ -151,8 +83,8 @@ async function compile({
     // "SB-11" !== "SB-11" => False
     // "SB-11" !== "SB-12" => True
 
-    for (let index = 0; index < res.length; index++) {
-      const obj = res[index];
+    for (let index = 0; index < objectArray.length; index++) {
+      const obj = objectArray[index];
       if (currentModelCode.modelCode !== obj["Model Kodu"]) {
         const modelId = await trendyolNotionCreateModelCode({
           modelCode: obj["Model Kodu"],
@@ -181,10 +113,11 @@ async function compile({
 
 // TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli
 // TODO: Merge phones in one list => iPhone 11: {hepsiburada: "iPhone 11", trendyol: "iphone 11"}
-// TODO: Pack of phones in the config file
 // TODO: Add second message to the config.json
 
 // TODO: Add an option to create a new product or add to existing product
 // - Query notion database => pass it to inq search list
 
 // TODO: Check if Main Code exists
+// TODO: Colors Collection
+// TODO: use collection and all other phones methods. Some times you need to extend 1 phone. Just make sure that they are combined. Create typed collection for example {trendyolList: ["iPhone 11"], outOfTrendyolList: ["G1s 2001"]}

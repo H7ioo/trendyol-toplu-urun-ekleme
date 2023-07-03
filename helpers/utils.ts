@@ -62,15 +62,19 @@ export function digitGen(length: number) {
  * @param text The text.
  * @returns true if the string is longer than zero
  */
+
 export function lengthValidator(text: string | string[]) {
+  // TODO: Prompt an error message but sometimes I wan't to get false because it's conditional
   if (Array.isArray(text))
     return text.length > 0 && text[0].length > 0 ? true : false;
   if (text.trim().length <= 0) return false;
   return true;
 }
 
-export function numberValidator(value: string) {
-  return !isNaN(parseInt(value)) && lengthValidator(value);
+export function numberValidator(value: string, errorMessage = true) {
+  const validator = !isNaN(parseInt(value)) && lengthValidator(value);
+  if (errorMessage) return validator ? true : "Sadece sayılar yazılmalı!";
+  return validator;
 }
 
 export function convertToNumber(value: string, float = true) {
@@ -128,6 +132,8 @@ export function replaceTurkishI(text: string) {
 }
 
 import * as XLSX from "xlsx";
+import { TrendyolFields, promptAnswersT } from "../types/types";
+import { KDVT, categoryT, currencyT, phonesT } from "../variables/variables";
 
 export function writeToExcel(
   resultArray: object[],
@@ -206,6 +212,110 @@ export async function showPrompt(questionsCollection: QuestionCollection) {
     }
   });
   return result;
+}
+
+// TODO:
+interface InformationLoopType extends promptAnswersT {
+  category: typeof categoryT;
+  currency: typeof currencyT;
+  KDV: typeof KDVT;
+  objectArray: object[];
+  mainList: typeof phonesT;
+}
+
+// Phone brand
+export const removePhoneBrandRegEx = (phoneType: string) => {
+  return new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
+};
+
+export async function generateInformationLoop({
+  phonesList,
+  phoneBrand,
+  title,
+  mainModalCode,
+  colors,
+  companyBrand,
+  category,
+  currency,
+  description,
+  stock,
+  KDV,
+  price,
+  globalPrice,
+  caseMaterial,
+  caseType,
+  guaranteePeriod,
+  caseBrand,
+  objectArray,
+  mainList,
+}: InformationLoopType) {
+  for (let i = 0; i < phonesList.length; i++) {
+    // - This works only if I wrote the phoneType the same as the phone brand written in the file
+    // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
+    const regex = removePhoneBrandRegEx(phoneBrand);
+    // Example: Iphone 11 Pro (from Excel Sheet)
+    const phoneName = phonesList[i] as (typeof mainList)[number];
+    // Example: 11 Pro
+    const phoneNameWithoutBrand = capitalizeLetters(
+      cleanUp(
+        replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+        false
+      )
+    );
+    // Example: 11Pro
+    const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+    // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+    const productTitle = `${phoneBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+    // Example: SB-11Pro
+    const productModal = `${mainModalCode}-${phoneCode}`;
+    // Example: 691
+    const randomDigits = digitGen(3);
+    for (let j = 0; j < colors.length; j++) {
+      // Example: Kırmızı
+      const color = colors[j];
+      // Example: SuarSB-11ProSari-691
+      const barcode = `${capitalizeLetters(
+        companyBrand ?? ""
+      )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+
+      // Fields
+      const fields: TrendyolFields = {
+        Barkod: barcode,
+        "Model Kodu": productModal,
+        Marka: companyBrand ?? "",
+        Kategori: category,
+        "Para Birimi": currency,
+        "Ürün Adı": productTitle,
+        "Ürün Açıklaması": description,
+        "Piyasa Satış Fiyatı (KDV Dahil)": globalPrice,
+        "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+        "Ürün Stok Adedi": stock,
+        "Stok Kodu": mainModalCode,
+        "KDV Oranı": KDV["3"],
+        Desi: "",
+        "Görsel 1": "",
+        "Görsel 2": "",
+        "Görsel 3": "",
+        "Görsel 4": "",
+        "Görsel 5": "",
+        "Görsel 6": "",
+        "Görsel 7": "",
+        "Görsel 8": "",
+        "Sevkiyat Süresi": "",
+        "Sevkiyat Tipi": "",
+        Renk: color,
+        Materyal: caseMaterial,
+        Model: caseType,
+        "Cep Telefonu Modeli": mainList.includes(phoneName) ? phoneName : "",
+        "Garanti Tipi": "",
+        "Garanti Süresi": guaranteePeriod,
+        "Uyumlu Marka": caseBrand,
+      };
+
+      // Push to the array
+      objectArray.push(fields);
+    }
+  }
 }
 
 /**

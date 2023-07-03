@@ -1,4 +1,3 @@
-// TODO: Add collection to the prompt of trendyol
 // TODO: Command system like discord files structure etc. loop over files and add the commands and it's just cli with -h and -c [command name]
 
 import { registerPrompts, showPrompt, writeToJSON } from "../helpers/utils";

@@ -54,9 +54,10 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     {
       type: "confirm",
       name: "useCollections",
-      message: "Koleksiyon kullanmak istiyor musunuz?",
+      message: "Koleksiyon kullanmak istiyor musunuz? / N",
       suffix: ":",
       when: phonesCollectionData.phonesCollections.length <= 0 ? false : true,
+      default: false,
     },
     {
       type: "search-checkbox",
@@ -75,7 +76,8 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
         });
         return answers.useCollections ? collectionNames : phonesT;
       },
-      filter: (input) => {
+      filter: (input, answers) => {
+        if (!answers.useCollections) return input;
         if (input.length) {
           const stringArray = input
             .toString()
@@ -88,7 +90,28 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       },
       validate: (input) => {
         console.log(`Count: ${input.length}`);
-        return lengthValidator(input);
+        // return lengthValidator(input);
+        return true;
+      },
+      suffix: ":",
+    },
+    {
+      type: "input",
+      name: "writtenPhonesList",
+      message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
+      filter: (input) => {
+        return cleanUp(input)
+          .split(",")
+          .map((phone) => {
+            // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+            return capitalizeLetters(phone);
+          });
+      },
+      validate: (input, answers) => {
+        if (lengthValidator(answers?.phonesList)) return true;
+        return lengthValidator(input)
+          ? true
+          : "En az 1 telefon modeli yazılmalı ya da seçilmeli.";
       },
       suffix: ":",
     },
@@ -210,6 +233,7 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       validate: lengthValidator,
       suffix: ":",
       when: data.askToRunNotion.value ?? true,
+      default: true,
     },
   ];
 
@@ -410,14 +434,10 @@ export const deleteCollectionPrompt: QuestionCollection = [
     // Filter the result to get only the name of the collection
     filter: (input) => {
       if (input.length) {
-        return (
-          input
-            .toString()
-            // TODO: TEST IT
-            // TODO: Might be a bug because the comma might not exist OLD => ],
-            .split(", ")
-            .map((value: string) => value.split(" =>")[0].trim())
-        );
+        return input
+          .toString()
+          .split(", ")
+          .map((value: string) => value.split(" =>")[0].trim());
       } else {
         return "";
       }
@@ -425,3 +445,6 @@ export const deleteCollectionPrompt: QuestionCollection = [
     suffix: ":",
   },
 ];
+
+// TODO: Replace telefonun bilen adi with the brand itself on the end of the prompt (*)
+// TODO: Undefined material
