@@ -7,6 +7,8 @@ export const currencyT = "TRY" as const;
 
 export const KDVT = ["0", "1", "8", "18"] as const;
 
+export const emptyStringWord = "Boş alan";
+
 // Available Material Types
 export const materialsT = [
   "Silikon",
@@ -15,10 +17,16 @@ export const materialsT = [
   "Mantar Derisi",
   "Suni Deri",
   "Polyester",
+  emptyStringWord,
 ] as const;
 
 // Available Types of Phone Cases
-export const casesTypesT = ["Arka Kapak", "Cüzdan Kılıf", "Çerçeve"] as const;
+export const casesTypesT = [
+  "Arka Kapak",
+  "Cüzdan Kılıf",
+  "Çerçeve",
+  emptyStringWord,
+] as const;
 
 // Garanti for The Phone Case
 export const guaranteesPeriodT = [

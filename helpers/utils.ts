@@ -133,7 +133,13 @@ export function replaceTurkishI(text: string) {
 
 import * as XLSX from "xlsx";
 import { TrendyolFields, promptAnswersT } from "../types/types";
-import { KDVT, categoryT, currencyT, phonesT } from "../variables/variables";
+import {
+  KDVT,
+  categoryT,
+  currencyT,
+  emptyStringWord,
+  phonesT,
+} from "../variables/variables";
 import {
   trendyolNotionCreateBarcode,
   trendyolNotionCreateModelCode,
@@ -234,29 +240,29 @@ export const removePhoneBrandRegEx = (phoneType: string) => {
   return new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
 };
 
-export async function generateInformationLoop({
-  mergedPhonesList,
-  phoneBrand,
-  title,
-  mainModalCode,
-  colors,
-  companyBrand,
-  category,
-  currency,
-  description,
-  stock,
-  KDV,
-  price,
-  globalPrice,
-  caseMaterial,
-  caseType,
-  guaranteePeriod,
-  caseBrand,
-  objectArray,
-  mainList,
-}: InformationLoopType) {
+export async function generateInformationLoop(props: InformationLoopType) {
+  const {
+    mergedPhonesList,
+    phoneBrand,
+    title,
+    mainModalCode,
+    colors,
+    companyBrand,
+    category,
+    currency,
+    description,
+    stock,
+    KDV,
+    price,
+    globalPrice,
+    caseMaterial,
+    caseType,
+    guaranteePeriod,
+    caseBrand,
+    objectArray,
+    mainList,
+  } = props;
   for (let i = 0; i < mergedPhonesList.length; i++) {
-    // TODO: There is an extra loop
     // - This works only if I wrote the phoneType the same as the phone brand written in the file
     // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
     const regex = removePhoneBrandRegEx(phoneBrand);
@@ -311,8 +317,8 @@ export async function generateInformationLoop({
         "Sevkiyat Süresi": "",
         "Sevkiyat Tipi": "",
         Renk: color,
-        Materyal: caseMaterial,
-        Model: caseType,
+        Materyal: replaceEmptyStringWord(caseMaterial, emptyStringWord),
+        Model: replaceEmptyStringWord(caseType, emptyStringWord),
         "Cep Telefonu Modeli": mainList.includes(phoneName) ? phoneName : "",
         "Garanti Tipi": "",
         "Garanti Süresi": guaranteePeriod,
@@ -382,4 +388,8 @@ export async function runNotion(title: string, objectArray: TrendyolFields[]) {
     }
     await sleep(300);
   }
+}
+
+export function replaceEmptyStringWord<T>(value: T, emptyStringWord: string) {
+  return value === emptyStringWord ? "" : value;
 }

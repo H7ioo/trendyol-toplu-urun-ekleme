@@ -455,5 +455,4 @@ export const deleteCollectionPrompt: QuestionCollection = [
   },
 ];
 
-// TODO: Replace telefonun bilen adi with the brand itself on the end of the prompt (*)
 // TODO: Undefined material

@@ -48,8 +48,8 @@ export interface TrendyolFields {
   "Sevkiyat Süresi": unknown;
   "Sevkiyat Tipi": unknown;
   Renk: string;
-  Materyal: (typeof materialsT)[number];
-  Model: (typeof casesTypesT)[number];
+  Materyal: (typeof materialsT)[number] | "";
+  Model: (typeof casesTypesT)[number] | "";
   "Cep Telefonu Modeli": (typeof phonesT)[number] | string;
   "Garanti Tipi": unknown;
   "Garanti Süresi": (typeof guaranteesPeriodT)[number];
