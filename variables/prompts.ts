@@ -43,7 +43,7 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     },
     {
       type: "input",
-      name: "phoneType",
+      name: "phoneBrand",
       message: "Telefonun bilinen adı yazınız",
       filter: (input) => {
         return cleanUp(input, false);
@@ -133,7 +133,7 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     },
     {
       type: "input",
-      name: "brand",
+      name: "companyBrand",
       message: "Marka adı yazınız",
       // validate: lengthValidator,
       suffix: ":",
@@ -183,7 +183,7 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     },
     {
       type: "search-list",
-      name: "material",
+      name: "caseMaterial",
       message: "Materyal seçiniz",
       choices: materialsT,
       suffix: ":",
