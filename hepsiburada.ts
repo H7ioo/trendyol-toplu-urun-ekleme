@@ -70,7 +70,6 @@ promptAnswersH) {
     //   phonesList[i].split(" ").slice(1).join(" ")
     // );
     // - This works only if I wrote the phoneType the same as the phone brand written in the file
-    // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung
     const regex = new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
     // Example: 11 Pro
     const phoneNameWithoutBrand = capitalizeLetters(

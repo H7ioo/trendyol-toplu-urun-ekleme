@@ -72,21 +72,18 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
         return collectionNames;
       },
       filter: (input: string[]) => {
-        if (lengthValidator(input)) {
-          // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
-          const collectionNames = input.map((collectionName) =>
-            collectionName.split(" =>")[0].trim()
-          );
-          const collections = phonesCollectionData.phonesCollections.filter(
-            (collection) => {
-              if (collectionNames.includes(collection.collectionName))
-                return true;
-            }
-          );
-          return collections.map((collection) => collection.phonesCollection);
-        } else {
-          return [];
-        }
+        if (!lengthValidator(input)) return [];
+        // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
+        const collectionNames = input.map((collectionName) =>
+          collectionName.split(" =>")[0].trim()
+        );
+        const collections = phonesCollectionData.phonesCollections.filter(
+          (collection) => {
+            if (collectionNames.includes(collection.collectionName))
+              return true;
+          }
+        );
+        return collections.map((collection) => collection.phonesCollection);
       },
       suffix: ":",
     },
@@ -106,6 +103,7 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       name: "writtenPhonesList",
       message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
       filter: (input) => {
+        if (!lengthValidator(input)) return [];
         return cleanUp(input)
           .split(",")
           .map((phone) => {
@@ -114,7 +112,11 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
           });
       },
       validate: (input, answers) => {
-        if (lengthValidator(answers?.phonesList)) return true;
+        if (
+          lengthValidator(answers?.phonesList) ||
+          lengthValidator(answers?.phonesCollection)
+        )
+          return true;
         return lengthValidator(input)
           ? true
           : "En az 1 telefon modeli yazılmalı ya da seçilmeli.";

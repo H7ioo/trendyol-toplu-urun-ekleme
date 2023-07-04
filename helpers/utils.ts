@@ -134,6 +134,11 @@ export function replaceTurkishI(text: string) {
 import * as XLSX from "xlsx";
 import { TrendyolFields, promptAnswersT } from "../types/types";
 import { KDVT, categoryT, currencyT, phonesT } from "../variables/variables";
+import {
+  trendyolNotionCreateBarcode,
+  trendyolNotionCreateModelCode,
+  trendyolNotionCreateProduct,
+} from "../lib/notion";
 
 export function writeToExcel(
   resultArray: object[],
@@ -251,6 +256,7 @@ export async function generateInformationLoop({
   mainList,
 }: InformationLoopType) {
   for (let i = 0; i < mergedPhonesList.length; i++) {
+    // TODO: There is an extra loop
     // - This works only if I wrote the phoneType the same as the phone brand written in the file
     // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
     const regex = removePhoneBrandRegEx(phoneBrand);
@@ -327,4 +333,53 @@ export function registerPrompts() {
   registerPrompt("search-list", require("inquirer-search-list"));
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
+}
+
+// TODO: Add an option to create a new product or add to existing product
+// - Query notion database => pass it to inq search list
+
+export async function runNotion(title: string, objectArray: TrendyolFields[]) {
+  const product = objectArray[0];
+
+  // Create product (it's 1 product so it won't matter if it's the first product of the last one)
+  const productId = await trendyolNotionCreateProduct({
+    title: title,
+    price: convertToNumber(product["Trendyol'da Satılacak Fiyat (KDV Dahil)"]),
+    piyasa: convertToNumber(product["Piyasa Satış Fiyatı (KDV Dahil)"]),
+    mainModalCode: product["Stok Kodu"],
+    description: product["Ürün Açıklaması"],
+  });
+
+  const currentModelCode: {
+    relation: string | null;
+    modelCode: string | null;
+  } = { relation: null, modelCode: null };
+  // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
+  // null !== "SB-11" => TruFe
+  // "SB-11" !== "SB-11" => False
+  // "SB-11" !== "SB-12" => True
+
+  for (let index = 0; index < objectArray.length; index++) {
+    const obj = objectArray[index];
+    if (currentModelCode.modelCode !== obj["Model Kodu"]) {
+      const modelId = await trendyolNotionCreateModelCode({
+        modelCode: obj["Model Kodu"],
+        relationId: productId,
+      });
+      await trendyolNotionCreateBarcode({
+        barcode: obj["Barkod"],
+        relationId: modelId,
+      });
+      currentModelCode.modelCode = obj["Model Kodu"];
+      currentModelCode.relation = modelId;
+    } else {
+      await trendyolNotionCreateBarcode({
+        barcode: obj["Barkod"],
+        // This will definitely will not run on the first time
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        relationId: currentModelCode.relation!,
+      });
+    }
+    await sleep(300);
+  }
 }
