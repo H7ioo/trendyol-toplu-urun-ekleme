@@ -9,14 +9,7 @@ import {
   numberValidator,
   pathRegex,
 } from "../helpers/utils";
-import {
-  phonesT,
-  phonesH,
-  colorsH,
-  caseMaterialsH,
-  caseTypesH,
-  caseBrandsH,
-} from "./variables";
+import { phonesT, phonesH } from "./variables";
 import {
   ProductPromptType,
   PromptQuestionFunctionProps,
@@ -82,7 +75,13 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       name: "price",
       message: "Satış fiyatı yazınız (.)",
       validate: numberValidator,
-      filter: (input) => convertToNumber(input),
+      filter: (input: string) => {
+        if (numberValidator(input, false)) {
+          return convertToNumber(input);
+        } else {
+          return input;
+        }
+      },
       suffix: ":",
     },
     {
@@ -90,7 +89,13 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       name: "stockAmount",
       message: "Stock adedi yazınız",
       validate: numberValidator,
-      filter: (input) => convertToNumber(input),
+      filter: (input) => {
+        if (numberValidator(input, false)) {
+          return convertToNumber(input);
+        } else {
+          return input;
+        }
+      },
       suffix: ":",
     },
     {
@@ -106,14 +111,14 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       message: "Telefon koleksiyonu seçiniz",
       choices: () => {
         // Get only THIS company array (trendyol)
-        const onlyComponyArray = phonesCollectionData.phonesCollections.filter(
+        const onlycompanyArray = phonesCollectionData.phonesCollections.filter(
           (collection) => {
             const c = collection as phonesCollectionPromptType;
             return c.company === company;
           }
         );
         // Get all collection names and show an array with it
-        const collectionNames = onlyComponyArray.map((collection) => {
+        const collectionNames = onlycompanyArray.map((collection) => {
           const c = collection as phonesCollectionPromptType;
           return `${c.collectionName} => ${JSON.stringify(c.phonesCollection)}`;
         });
@@ -194,10 +199,7 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       name: "colors",
       message: "Renkleri seçiniz",
       choices: company === "hepsiburada" ? props.colors : [],
-      validate: (input: string[]) => {
-        console.log(`Count: ${input.length}`);
-        return true;
-      },
+      validate: lengthValidator,
       suffix: ":",
       when: company === "hepsiburada",
     },
@@ -219,7 +221,13 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       type: "input",
       name: "marketPrice",
       message: "Piyasa fiyatı yazınız",
-      filter: (input) => convertToNumber(input),
+      filter: (input) => {
+        if (numberValidator(input, false)) {
+          return convertToNumber(input);
+        } else {
+          return input;
+        }
+      },
       validate: numberValidator,
       suffix: ":",
       when: company === "trendyol",
@@ -291,132 +299,6 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
 };
 
 // Questions collection
-
-export const promptQuestionsH: QuestionCollection = [
-  {
-    type: "input",
-    name: "title",
-    message: "Ürün adı yazınız",
-    filter: (input) => {
-      return capitalizeLetters(cleanUp(input));
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "phoneType",
-    message: "Telefonun bilinen adı yazınız",
-    filter: (input) => {
-      return cleanUp(input, false);
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-checkbox",
-    name: "phonesList",
-    message: "Telefon modelleri seçiniz",
-    choices: phonesH, // ! --------------
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  // {
-  //   type: "search-checkbox",
-  //   name: "phoneBrandCrap",
-  //   message: "phoneBrandCrap seçiniz",
-  //   choices: crap,
-  //   suffix: ":",
-  // },
-  {
-    type: "input",
-    name: "options",
-    message: "Seçenekler yazınız (aralarında virgül koyarak)", // ! --------------
-    filter: (input) => {
-      return cleanUp(input)
-        .split(",")
-        .map((option) => {
-          // return removeWhiteSpaces(upperLetters(phoneAnswer));
-          return capitalizeLetters(option);
-        });
-    },
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "mainModalCode",
-    message: "Ana model kodu yazınız",
-    filter: (input) => {
-      return cleanUp(input).toUpperCase();
-    },
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "brand",
-    message: "Marka adı yazınız",
-    // validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-checkbox",
-    name: "colors",
-    message: "Renkleri seçiniz",
-    choices: colorsH, // ! --------------
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "price",
-    message: "Satış fiyatı yazınız (,)", // ! --------------
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "stockAmount",
-    message: "Stock adedi yazınız",
-    validate: numberValidator,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "productDescription",
-    message: "Ürün açıklaması yazınız",
-    validate: lengthValidator,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "material",
-    message: "Materyal seçiniz", // ! --------------
-    choices: caseMaterialsH,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "caseType",
-    message: "Kılıf modeli seçiniz", // ! --------------
-    choices: caseTypesH,
-    suffix: ":",
-  },
-  {
-    type: "search-list",
-    name: "caseBrand",
-    message: "Uyumlu marka seçiniz", // ! --------------
-    choices: caseBrandsH,
-    suffix: ":",
-  },
-  {
-    type: "input",
-    name: "path",
-    message: "Path?",
-    validate: lengthValidator,
-    suffix: ":",
-  },
-];
 
 let createCollectionNameFlag = false;
 export const createCollectionPrompt: QuestionCollection = [

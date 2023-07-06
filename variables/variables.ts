@@ -3244,3 +3244,5 @@ export const guaranteeTypesH = [
 ] as const;
 
 export const waterProofH = ["Var, Yok"] as const;
+
+export const companies = ["trendyol", "hepsiburada"];

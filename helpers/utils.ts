@@ -94,10 +94,14 @@ export function lengthValidator(text: string | string[]) {
   return true;
 }
 
-export function numberValidator(value: string, errorMessage = true) {
-  const validator = !isNaN(parseInt(value)) && lengthValidator(value);
-  if (errorMessage) return validator ? true : "Sadece sayılar yazılmalı!";
-  return validator;
+export function numberValidator(value: string | number, errorMessage = true) {
+  if (typeof value === "string") {
+    const validator = !isNaN(parseFloat(value)) && lengthValidator(value);
+    if (errorMessage) return validator ? true : "Sadece sayılar yazılmalı!";
+    return validator;
+  } else {
+    return true;
+  }
 }
 
 export function convertToNumber(value: string, float = true) {
@@ -352,7 +356,8 @@ export async function generateInformationLoop(props: InformationLoopType) {
       // Example: SB-11Pro
       const productModal = `${productCode}-${phoneCode}`;
       // Example: 691
-      const randomDigits = digitGen(3);
+      // const randomDigits = digitGen(3);
+      const randomDigits = generateStupidHepsiburadaBarcode();
       for (let j = 0; j < colors.length; j++) {
         // Example: Kırmızı
         const color = colors[j];
@@ -361,7 +366,7 @@ export async function generateInformationLoop(props: InformationLoopType) {
         // const barcode = `${capitalizeLetters(
         //   trademark ?? ""
         // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
-        const barcode = generateStupidHepsiburadaBarcode();
+        const barcode = randomDigits;
 
         // Example: SB-11Pro-Siyah
         const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
