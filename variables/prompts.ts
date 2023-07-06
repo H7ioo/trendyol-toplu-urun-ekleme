@@ -4,38 +4,47 @@ import {
   capitalizeLetters,
   cleanUp,
   convertPath,
+  convertToNumber,
   lengthValidator,
   numberValidator,
   pathRegex,
 } from "../helpers/utils";
 import {
   phonesT,
-  materialsT,
-  casesTypesT,
-  guaranteesPeriodT,
-  caseBrandsT,
   phonesH,
   colorsH,
-  materialsH,
-  casesTypesH,
+  caseMaterialsH,
+  caseTypesH,
   caseBrandsH,
 } from "./variables";
 import {
-  ConfigFileObjectType,
+  ProductPromptType,
+  PromptQuestionFunctionProps,
   phonesCollectionPromptType,
 } from "../types/types";
 
 import phonesCollectionData from "../config/phonesCollections.json";
 
 // Questions collection
-export const promptQuestionsT = (data: ConfigFileObjectType) => {
-  const company = "trendyol";
+export const promptQuestionsT = (props: PromptQuestionFunctionProps) => {
+  const {
+    company,
+    configFileData,
+    phonesList,
+    caseMaterials,
+    caseBrands,
+    caseTypes,
+    // guaranteePeriod
+  } = props;
+  // TODO: Use 1 question instead
+  // TODO: Found a solution for type safety
   const promptCollection: QuestionCollection = [
+    // # MAIN Questions
     {
       type: "input",
       name: "title",
       message: "Ürün adı yazınız",
-      filter: (input) => {
+      filter: (input: string) => {
         return capitalizeLetters(cleanUp(input));
       },
       validate: lengthValidator,
@@ -45,19 +54,58 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       type: "input",
       name: "phoneBrand",
       message: "Telefonun bilinen adı yazınız",
-      filter: (input) => {
+      filter: (input: string) => {
         return cleanUp(input, false);
       },
       validate: lengthValidator,
       suffix: ":",
     },
-
+    {
+      type: "input",
+      name: "productCode",
+      message: "Ana model kodu yazınız",
+      filter: (input: string) => {
+        return cleanUp(input).toUpperCase();
+      },
+      validate: lengthValidator,
+      suffix: ":",
+    },
+    {
+      type: "input",
+      name: "trademark",
+      message: "Marka adı yazınız",
+      // validate: lengthValidator,
+      suffix: ":",
+    },
+    {
+      type: "input",
+      name: "price",
+      message: "Satış fiyatı yazınız (.)",
+      validate: numberValidator,
+      filter: (input) => convertToNumber(input),
+      suffix: ":",
+    },
+    {
+      type: "input",
+      name: "stockAmount",
+      message: "Stock adedi yazınız",
+      validate: numberValidator,
+      filter: (input) => convertToNumber(input),
+      suffix: ":",
+    },
+    {
+      type: "input",
+      name: "productDescription",
+      message: "Ürün açıklaması yazınız",
+      validate: lengthValidator,
+      suffix: ":",
+    },
     {
       type: "search-checkbox",
-      name: "phonesCollection",
+      name: "phonesCollections",
       message: "Telefon koleksiyonu seçiniz",
       choices: () => {
-        // Get only t his company array (trendyol)
+        // Get only THIS company array (trendyol)
         const onlyComponyArray = phonesCollectionData.phonesCollections.filter(
           (collection) => {
             const c = collection as phonesCollectionPromptType;
@@ -91,18 +139,19 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
       type: "search-checkbox",
       name: "phonesList",
       message: "Telefon modelleri seçiniz",
-      choices: phonesT,
-      validate: (input) => {
+      choices: phonesList,
+      validate: (input: string[]) => {
         console.log(`Count: ${input.length}`);
         return true;
       },
       suffix: ":",
     },
+
     {
       type: "input",
       name: "writtenPhonesList",
       message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
-      filter: (input) => {
+      filter: (input: string) => {
         if (!lengthValidator(input)) return [];
         return cleanUp(input)
           .split(",")
@@ -111,10 +160,10 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
             return capitalizeLetters(phone);
           });
       },
-      validate: (input, answers) => {
+      validate: (input: string, answers: ProductPromptType) => {
         if (
           lengthValidator(answers?.phonesList) ||
-          lengthValidator(answers?.phonesCollection)
+          lengthValidator(answers?.phonesCollections)
         )
           return true;
         return lengthValidator(input)
@@ -125,26 +174,9 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     },
     {
       type: "input",
-      name: "mainModalCode",
-      message: "Ana model kodu yazınız",
-      filter: (input) => {
-        return cleanUp(input).toUpperCase();
-      },
-      validate: lengthValidator,
-      suffix: ":",
-    },
-    {
-      type: "input",
-      name: "companyBrand",
-      message: "Marka adı yazınız",
-      // validate: lengthValidator,
-      suffix: ":",
-    },
-    {
-      type: "input",
       name: "colors",
       message: "Renkleri yazınız (aralarında virgül koyarak)",
-      filter: (input) => {
+      filter: (input: string) => {
         return cleanUp(input)
           .split(",")
           .map((colorAnswer) => {
@@ -157,64 +189,46 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
     },
     {
       type: "input",
-      name: "globalPrice",
+      name: "marketPrice",
       message: "Piyasa fiyatı yazınız",
+      filter: (input) => convertToNumber(input),
       validate: numberValidator,
       suffix: ":",
-    },
-    {
-      type: "input",
-      name: "price",
-      message: "Trendyol satış fiyatı yazınız (.)",
-      validate: numberValidator,
-      suffix: ":",
-    },
-    {
-      type: "input",
-      name: "stock",
-      message: "Stock adedi yazınız",
-      validate: numberValidator,
-      suffix: ":",
-    },
-    {
-      type: "input",
-      name: "description",
-      message: "Ürün açıklaması yazınız",
-      validate: lengthValidator,
-      suffix: ":",
+      when: company === "trendyol",
     },
     {
       type: "search-list",
       name: "caseMaterial",
       message: "Materyal seçiniz",
-      choices: materialsT,
+      choices: caseMaterials,
       suffix: ":",
     },
     {
       type: "search-list",
       name: "caseType",
       message: "Kılıf modeli seçiniz",
-      choices: casesTypesT,
+      choices: caseTypes,
       suffix: ":",
     },
     {
       type: "search-list",
       name: "guaranteePeriod",
       message: "Garanti süresi seçiniz",
-      choices: guaranteesPeriodT,
+      choices: company === "trendyol" ? props.guaranteePeriods : [],
       suffix: ":",
+      when: company === "trendyol",
     },
     {
       type: "search-list",
       name: "caseBrand",
       message: "Uyumlu marka seçiniz",
-      choices: caseBrandsT,
+      choices: caseBrands,
       suffix: ":",
     },
     {
       type: "input",
-      name: data.path.name,
-      message: data.path.message,
+      name: configFileData.path.name,
+      message: configFileData.path.message,
       validate: (input) => {
         // Check for the length
         if (lengthValidator(input)) {
@@ -232,15 +246,15 @@ export const promptQuestionsT = (data: ConfigFileObjectType) => {
         return false;
       },
       suffix: ":",
-      default: data.path.value ?? undefined,
+      default: configFileData.path.value ?? undefined,
     },
     {
       type: "confirm",
-      name: data.askToRunNotion.name,
-      message: data.askToRunNotion.message,
+      name: configFileData.askToRunNotion.name,
+      message: configFileData.askToRunNotion.message,
       validate: lengthValidator,
       suffix: ":",
-      when: data.askToRunNotion.value ?? true,
+      when: configFileData.askToRunNotion.value ?? true,
       default: true,
     },
   ];
@@ -275,7 +289,7 @@ export const promptQuestionsH: QuestionCollection = [
     type: "search-checkbox",
     name: "phonesList",
     message: "Telefon modelleri seçiniz",
-    choices: phonesH,
+    choices: phonesH, // ! --------------
     validate: lengthValidator,
     suffix: ":",
   },
@@ -289,7 +303,7 @@ export const promptQuestionsH: QuestionCollection = [
   {
     type: "input",
     name: "options",
-    message: "Seçenekler yazınız (aralarında virgül koyarak)",
+    message: "Seçenekler yazınız (aralarında virgül koyarak)", // ! --------------
     filter: (input) => {
       return cleanUp(input)
         .split(",")
@@ -321,14 +335,14 @@ export const promptQuestionsH: QuestionCollection = [
     type: "search-checkbox",
     name: "colors",
     message: "Renkleri seçiniz",
-    choices: colorsH,
+    choices: colorsH, // ! --------------
     validate: lengthValidator,
     suffix: ":",
   },
   {
     type: "input",
     name: "price",
-    message: "Satış fiyatı yazınız (,)",
+    message: "Satış fiyatı yazınız (,)", // ! --------------
     validate: numberValidator,
     suffix: ":",
   },
@@ -349,21 +363,21 @@ export const promptQuestionsH: QuestionCollection = [
   {
     type: "search-list",
     name: "material",
-    message: "Materyal seçiniz",
-    choices: materialsH,
+    message: "Materyal seçiniz", // ! --------------
+    choices: caseMaterialsH,
     suffix: ":",
   },
   {
     type: "search-list",
     name: "caseType",
-    message: "Kılıf modeli seçiniz",
-    choices: casesTypesH,
+    message: "Kılıf modeli seçiniz", // ! --------------
+    choices: caseTypesH,
     suffix: ":",
   },
   {
     type: "search-list",
     name: "caseBrand",
-    message: "Uyumlu marka seçiniz",
+    message: "Uyumlu marka seçiniz", // ! --------------
     choices: caseBrandsH,
     suffix: ":",
   },
@@ -376,7 +390,6 @@ export const promptQuestionsH: QuestionCollection = [
   },
 ];
 
-// TODO: Global it
 let createCollectionNameFlag = false;
 export const createCollectionPrompt: QuestionCollection = [
   {
@@ -454,5 +467,3 @@ export const deleteCollectionPrompt: QuestionCollection = [
     suffix: ":",
   },
 ];
-
-// TODO: Undefined material

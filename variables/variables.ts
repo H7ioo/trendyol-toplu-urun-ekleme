@@ -10,7 +10,7 @@ export const KDVT = ["0", "1", "8", "18"] as const;
 export const emptyStringWord = "Boş alan";
 
 // Available Material Types
-export const materialsT = [
+export const caseMaterialsT = [
   "Silikon",
   "Plastik",
   "Hakiki Deri",
@@ -21,7 +21,7 @@ export const materialsT = [
 ] as const;
 
 // Available Types of Phone Cases
-export const casesTypesT = [
+export const caseTypesT = [
   "Arka Kapak",
   "Cüzdan Kılıf",
   "Çerçeve",
@@ -29,7 +29,7 @@ export const casesTypesT = [
 ] as const;
 
 // Garanti for The Phone Case
-export const guaranteesPeriodT = [
+export const guaranteePeriodsT = [
   "Belirtilmemiş",
   "6 Ay",
   "1 Yıl",
@@ -825,7 +825,7 @@ export const caseBrandsT = [
 export const KDVH = ["0", "1", "8", "18"] as const;
 
 // Available Material Types
-export const materialsH = [
+export const caseMaterialsH = [
   "Silikon",
   "Ahşap",
   "Aynalı",
@@ -889,7 +889,7 @@ export const materialsH = [
 ] as const;
 
 // Available Types of Phone Cases
-export const casesTypesH = [
+export const caseTypesH = [
   "Arka Kapak",
   "Arka Kılıf",
   "Askılı Kılıf",
@@ -3238,7 +3238,7 @@ export const caseBrandsH = [
   "iPhone",
 ] as const;
 
-export const guaranteesTypeH = [
+export const guaranteeTypesH = [
   "İthalatçı Garantili",
   "Sony Eurasia Garantili",
 ] as const;

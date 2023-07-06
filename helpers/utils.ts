@@ -132,7 +132,7 @@ export function replaceTurkishI(text: string) {
 }
 
 import * as XLSX from "xlsx";
-import { TrendyolFields, promptAnswersT } from "../types/types";
+import { ProductPromptType, TrendyolFields } from "../types/types";
 import {
   KDVT,
   categoryT,
@@ -225,15 +225,14 @@ export async function showPrompt(questionsCollection: QuestionCollection) {
   return result;
 }
 
-// TODO:
-interface InformationLoopType extends promptAnswersT {
+type InformationLoopType = {
   category: typeof categoryT;
   currency: typeof currencyT;
   KDV: typeof KDVT;
   objectArray: object[];
   mainList: typeof phonesT;
   mergedPhonesList: string[];
-}
+} & ProductPromptType;
 
 // Phone brand
 export const removePhoneBrandRegEx = (phoneType: string) => {
@@ -245,88 +244,89 @@ export async function generateInformationLoop(props: InformationLoopType) {
     mergedPhonesList,
     phoneBrand,
     title,
-    mainModalCode,
+    productCode,
     colors,
-    companyBrand,
+    trademark,
     category,
     currency,
-    description,
-    stock,
+    productDescription,
+    stockAmount,
     KDV,
     price,
-    globalPrice,
     caseMaterial,
     caseType,
-    guaranteePeriod,
     caseBrand,
     objectArray,
     mainList,
+    company,
   } = props;
-  for (let i = 0; i < mergedPhonesList.length; i++) {
-    // - This works only if I wrote the phoneType the same as the phone brand written in the file
-    // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
-    const regex = removePhoneBrandRegEx(phoneBrand);
-    // Example: Iphone 11 Pro (from Excel Sheet)
-    const phoneName = mergedPhonesList[i] as (typeof mainList)[number];
-    // Example: 11 Pro
-    const phoneNameWithoutBrand = capitalizeLetters(
-      cleanUp(
-        replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
-        false
-      )
-    );
-    // Example: 11Pro
-    const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
-    // Example: iPhone 11 Pro Uyumlu I Love Your Mom
-    const productTitle = `${phoneBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
-    // Example: SB-11Pro
-    const productModal = `${mainModalCode}-${phoneCode}`;
-    // Example: 691
-    const randomDigits = digitGen(3);
-    for (let j = 0; j < colors.length; j++) {
-      // Example: Kırmızı
-      const color = colors[j];
-      // Example: SuarSB-11ProSari-691
-      const barcode = `${capitalizeLetters(
-        companyBrand ?? ""
-      )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+  if (company === "trendyol") {
+    for (let i = 0; i < mergedPhonesList.length; i++) {
+      // - This works only if I wrote the phoneType the same as the phone brand written in the file
+      // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
+      const regex = removePhoneBrandRegEx(phoneBrand);
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const phoneName = mergedPhonesList[i] as (typeof mainList)[number];
+      // Example: 11 Pro
+      const phoneNameWithoutBrand = capitalizeLetters(
+        cleanUp(
+          replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+          false
+        )
+      );
+      // Example: 11Pro
+      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+      const productTitle = `${phoneBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+      // Example: SB-11Pro
+      const productModal = `${productCode}-${phoneCode}`;
+      // Example: 691
+      const randomDigits = digitGen(3);
+      for (let j = 0; j < colors.length; j++) {
+        // Example: Kırmızı
+        const color = colors[j];
+        // Example: SuarSB-11ProSari-691
+        const barcode = `${capitalizeLetters(
+          trademark ?? ""
+        )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
 
-      // Fields
-      const fields: TrendyolFields = {
-        Barkod: barcode,
-        "Model Kodu": productModal,
-        Marka: companyBrand ?? "",
-        Kategori: category,
-        "Para Birimi": currency,
-        "Ürün Adı": productTitle,
-        "Ürün Açıklaması": description,
-        "Piyasa Satış Fiyatı (KDV Dahil)": globalPrice,
-        "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
-        "Ürün Stok Adedi": stock,
-        "Stok Kodu": mainModalCode,
-        "KDV Oranı": KDV["3"],
-        Desi: "",
-        "Görsel 1": "",
-        "Görsel 2": "",
-        "Görsel 3": "",
-        "Görsel 4": "",
-        "Görsel 5": "",
-        "Görsel 6": "",
-        "Görsel 7": "",
-        "Görsel 8": "",
-        "Sevkiyat Süresi": "",
-        "Sevkiyat Tipi": "",
-        Renk: color,
-        Materyal: replaceEmptyStringWord(caseMaterial, emptyStringWord),
-        Model: replaceEmptyStringWord(caseType, emptyStringWord),
-        "Cep Telefonu Modeli": mainList.includes(phoneName) ? phoneName : "",
-        "Garanti Tipi": "",
-        "Garanti Süresi": guaranteePeriod,
-        "Uyumlu Marka": caseBrand,
-      };
+        // Fields
+        const fields: TrendyolFields = {
+          Barkod: barcode,
+          "Model Kodu": productModal,
+          Marka: trademark ?? "",
+          Kategori: category,
+          "Para Birimi": currency,
+          "Ürün Adı": productTitle,
+          "Ürün Açıklaması": productDescription,
+          "Piyasa Satış Fiyatı (KDV Dahil)": props.marketPrice,
+          "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+          "Ürün Stok Adedi": stockAmount,
+          "Stok Kodu": productCode,
+          "KDV Oranı": KDV["3"],
+          Desi: "",
+          "Görsel 1": "",
+          "Görsel 2": "",
+          "Görsel 3": "",
+          "Görsel 4": "",
+          "Görsel 5": "",
+          "Görsel 6": "",
+          "Görsel 7": "",
+          "Görsel 8": "",
+          "Sevkiyat Süresi": "",
+          "Sevkiyat Tipi": "",
+          Renk: color,
+          Materyal: replaceEmptyStringWord(caseMaterial, emptyStringWord),
+          Model: replaceEmptyStringWord(caseType, emptyStringWord),
+          "Cep Telefonu Modeli": mainList.includes(phoneName) ? phoneName : "",
+          "Garanti Tipi": "",
+          "Garanti Süresi": props.guaranteePeriod,
+          "Uyumlu Marka": caseBrand,
+        };
 
-      // Push to the array
-      objectArray.push(fields);
+        // Push to the array
+        objectArray.push(fields);
+      }
     }
   }
 }
@@ -350,8 +350,8 @@ export async function runNotion(title: string, objectArray: TrendyolFields[]) {
   // Create product (it's 1 product so it won't matter if it's the first product of the last one)
   const productId = await trendyolNotionCreateProduct({
     title: title,
-    price: convertToNumber(product["Trendyol'da Satılacak Fiyat (KDV Dahil)"]),
-    piyasa: convertToNumber(product["Piyasa Satış Fiyatı (KDV Dahil)"]),
+    price: product["Trendyol'da Satılacak Fiyat (KDV Dahil)"],
+    piyasa: product["Piyasa Satış Fiyatı (KDV Dahil)"],
     mainModalCode: product["Stok Kodu"],
     description: product["Ürün Açıklaması"],
   });
@@ -392,4 +392,23 @@ export async function runNotion(title: string, objectArray: TrendyolFields[]) {
 
 export function replaceEmptyStringWord<T>(value: T, emptyStringWord: string) {
   return value === emptyStringWord ? "" : value;
+}
+
+export function generateStupidHepsiburadaBarcode() {
+  // Generate 12 random digits
+  let digits = "";
+  for (let i = 0; i < 12; i++) {
+    digits += Math.floor(Math.random() * 10);
+  }
+
+  // Calculate the check digit
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(digits.charAt(i)) * (i % 2 === 0 ? 1 : 3);
+  }
+  const checkDigit = (10 - (sum % 10)) % 10;
+
+  // Construct the final EAN-13 barcode
+  const barcode = digits + checkDigit;
+  return `kılıfsuaraksesuar${barcode}`;
 }

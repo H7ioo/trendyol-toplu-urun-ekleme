@@ -6,38 +6,55 @@ import {
   showPrompt,
   writeToExcel,
 } from "./helpers/utils";
-import configFileObject from "./config/config.json";
+import configFileData from "./config/config.json";
 
-import { KDVT, categoryT, currencyT, phonesT } from "./variables/variables";
-import { TrendyolFields, promptAnswersT } from "./types/types";
+import {
+  KDVT,
+  caseBrandsT,
+  caseMaterialsT,
+  caseTypesT,
+  categoryT,
+  currencyT,
+  guaranteePeriodsT,
+  phonesT,
+} from "./variables/variables";
+import { ProductPromptType, TrendyolFields } from "./types/types";
 import { promptQuestionsT } from "./variables/prompts";
 
 registerPrompts();
 (async () => {
   const result = (await showPrompt(
-    promptQuestionsT(configFileObject)
-  )) as promptAnswersT;
+    promptQuestionsT({
+      company: "trendyol",
+      configFileData,
+      caseBrands: caseBrandsT,
+      caseMaterials: caseMaterialsT,
+      caseTypes: caseTypesT,
+      phonesList: phonesT,
+      guaranteePeriods: guaranteePeriodsT,
+    })
+  )) as ProductPromptType;
   compile(result);
 })();
 
 // - Helpers
 
-async function compile(props: promptAnswersT) {
+async function compile(props: ProductPromptType) {
   const {
     path,
     askToRunNotion,
-    mainModalCode,
+    productCode,
     caseBrand,
     title,
     writtenPhonesList,
     phonesList,
-    phonesCollection,
+    phonesCollections,
   } = props;
 
   const mergedPhonesList = [
     ...writtenPhonesList,
     ...phonesList,
-    ...phonesCollection,
+    ...phonesCollections,
   ];
   const objectArray: TrendyolFields[] = [];
   generateInformationLoop({
@@ -55,7 +72,7 @@ async function compile(props: promptAnswersT) {
     writeToExcel(
       objectArray,
       cleanUp(path, false).replace(/"/gi, ""),
-      mainModalCode,
+      productCode,
       caseBrand,
       "trendyol"
     );
@@ -66,6 +83,7 @@ async function compile(props: promptAnswersT) {
   }
 }
 
+// TODO: useCollections config.json
 // TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli
 // TODO: Merge phones in one list => iPhone 11: {hepsiburada: "iPhone 11", trendyol: "iphone 11"}
 // TODO: Add second message to the config.json
