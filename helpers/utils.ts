@@ -1,5 +1,28 @@
 import { QuestionCollection, prompt, registerPrompt } from "inquirer";
 import fs from "fs";
+import * as XLSX from "xlsx";
+import {
+  HepsiburadaFields,
+  InformationLoopType,
+  ProductPromptType,
+  TrendyolFields,
+} from "../types/types";
+import {
+  KDVH,
+  KDVT,
+  categoryT,
+  currencyT,
+  emptyStringWord,
+  phonesT,
+} from "../variables/variables";
+import {
+  hepsiburadaNotionCreateBarcode,
+  hepsiburadaNotionCreateProduct,
+  hepsiburadaNotionCreateStockCode,
+  trendyolNotionCreateBarcode,
+  trendyolNotionCreateModelCode,
+  trendyolNotionCreateProduct,
+} from "../lib/notion";
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -131,21 +154,6 @@ export function replaceTurkishI(text: string) {
   return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
 }
 
-import * as XLSX from "xlsx";
-import { ProductPromptType, TrendyolFields } from "../types/types";
-import {
-  KDVT,
-  categoryT,
-  currencyT,
-  emptyStringWord,
-  phonesT,
-} from "../variables/variables";
-import {
-  trendyolNotionCreateBarcode,
-  trendyolNotionCreateModelCode,
-  trendyolNotionCreateProduct,
-} from "../lib/notion";
-
 export function writeToExcel(
   resultArray: object[],
   path: string,
@@ -153,7 +161,16 @@ export function writeToExcel(
   caseBrand: string,
   company: "trendyol" | "hepsiburada"
 ) {
-  const sheetName = "Ürünlerinizi Burada Listeleyin";
+  // Sheet name depending on company
+  let sheetName;
+  switch (company) {
+    case "hepsiburada":
+      sheetName = "Kılıflar";
+      break;
+    case "trendyol":
+      sheetName = "Ürünlerinizi Burada Listeleyin";
+      break;
+  }
   // Read the file into memory
   const workbook = XLSX.readFile(`./xlsx/${company}.xlsx`);
 
@@ -225,15 +242,6 @@ export async function showPrompt(questionsCollection: QuestionCollection) {
   return result;
 }
 
-type InformationLoopType = {
-  category: typeof categoryT;
-  currency: typeof currencyT;
-  KDV: typeof KDVT;
-  objectArray: object[];
-  mainList: typeof phonesT;
-  mergedPhonesList: string[];
-} & ProductPromptType;
-
 // Phone brand
 export const removePhoneBrandRegEx = (phoneType: string) => {
   return new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
@@ -247,17 +255,13 @@ export async function generateInformationLoop(props: InformationLoopType) {
     productCode,
     colors,
     trademark,
-    category,
-    currency,
     productDescription,
     stockAmount,
-    KDV,
     price,
     caseMaterial,
     caseType,
     caseBrand,
     objectArray,
-    mainList,
     company,
   } = props;
   if (company === "trendyol") {
@@ -266,7 +270,7 @@ export async function generateInformationLoop(props: InformationLoopType) {
       // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
       const regex = removePhoneBrandRegEx(phoneBrand);
       // Example: Iphone 11 Pro (from Excel Sheet)
-      const phoneName = mergedPhonesList[i] as (typeof mainList)[number];
+      const phoneName = mergedPhonesList[i] as (typeof phonesT)[number];
       // Example: 11 Pro
       const phoneNameWithoutBrand = capitalizeLetters(
         cleanUp(
@@ -295,15 +299,15 @@ export async function generateInformationLoop(props: InformationLoopType) {
           Barkod: barcode,
           "Model Kodu": productModal,
           Marka: trademark ?? "",
-          Kategori: category,
-          "Para Birimi": currency,
+          Kategori: categoryT,
+          "Para Birimi": currencyT,
           "Ürün Adı": productTitle,
           "Ürün Açıklaması": productDescription,
           "Piyasa Satış Fiyatı (KDV Dahil)": props.marketPrice,
           "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
           "Ürün Stok Adedi": stockAmount,
           "Stok Kodu": productCode,
-          "KDV Oranı": KDV["3"],
+          "KDV Oranı": KDVT["3"],
           Desi: "",
           "Görsel 1": "",
           "Görsel 2": "",
@@ -318,7 +322,7 @@ export async function generateInformationLoop(props: InformationLoopType) {
           Renk: color,
           Materyal: replaceEmptyStringWord(caseMaterial, emptyStringWord),
           Model: replaceEmptyStringWord(caseType, emptyStringWord),
-          "Cep Telefonu Modeli": mainList.includes(phoneName) ? phoneName : "",
+          "Cep Telefonu Modeli": phonesT.includes(phoneName) ? phoneName : "",
           "Garanti Tipi": "",
           "Garanti Süresi": props.guaranteePeriod,
           "Uyumlu Marka": caseBrand,
@@ -326,6 +330,81 @@ export async function generateInformationLoop(props: InformationLoopType) {
 
         // Push to the array
         objectArray.push(fields);
+      }
+    }
+  } else if (company === "hepsiburada") {
+    for (let i = 0; i < mergedPhonesList.length; i++) {
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const regex = removePhoneBrandRegEx(phoneBrand);
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const phoneName = mergedPhonesList[i] as (typeof phonesT)[number];
+      // Example: 11 Pro
+      const phoneNameWithoutBrand = capitalizeLetters(
+        cleanUp(
+          replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+          false
+        )
+      );
+      // Example: 11Pro
+      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+      const productTitle = `${phoneBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+      // Example: SB-11Pro
+      const productModal = `${productCode}-${phoneCode}`;
+      // Example: 691
+      const randomDigits = digitGen(3);
+      for (let j = 0; j < colors.length; j++) {
+        // Example: Kırmızı
+        const color = colors[j];
+        // Example: SuarSB-11Pro-Sari-691
+        // TODO: check if there is a better way
+        // const barcode = `${capitalizeLetters(
+        //   trademark ?? ""
+        // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+        const barcode = generateStupidHepsiburadaBarcode();
+
+        // Example: SB-11Pro-Siyah
+        const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
+          color
+        )}`.toUpperCase();
+
+        for (let x = 0; x < props.options.length; x++) {
+          const option = props.options[x];
+          // Fields
+          const fields = {
+            "Ürün Adı": productTitle,
+            "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
+            Barkod: barcode,
+            "Varyant Grup Id": productModal,
+            "Ürün Açıklaması": productDescription,
+            Marka: trademark ?? "",
+            Desi: 1,
+            KDV: KDVH[3],
+            "Garanti Süresi (Ay)": 0,
+            Görsel1: "",
+            Görsel2: "",
+            Görsel3: "",
+            Görsel4: "",
+            Görsel5: "",
+            Fiyat: price,
+            Stok: stockAmount,
+            Video: "",
+            "Uyumlu Model": "", // TODO: it might not match or it won't
+            Renk: color,
+            Seçenek: option,
+            "Telefon Modeli": phoneName,
+            "Uyumlu Marka": caseBrand,
+            "Garanti Tipi": "",
+            "Su Geçirmezlik": "",
+            "Ürün  Kodu": "",
+            "Malzeme Türü": caseMaterial,
+            "Garanti Tipi2": "",
+            "Kılıf Tipi": caseType,
+          };
+
+          // Push to the array
+          objectArray.push(fields);
+        }
       }
     }
   }
@@ -344,49 +423,86 @@ export function registerPrompts() {
 // TODO: Add an option to create a new product or add to existing product
 // - Query notion database => pass it to inq search list
 
-export async function runNotion(title: string, objectArray: TrendyolFields[]) {
-  const product = objectArray[0];
+export async function runNotion(
+  props: { title: string } & (
+    | { company: "trendyol"; objectArray: TrendyolFields[] }
+    | {
+        company: "hepsiburada";
+        objectArray: HepsiburadaFields[];
+        productCode: string;
+      }
+  )
+) {
+  const { title, objectArray, company } = props;
+  if (company === "trendyol") {
+    const product = objectArray[0];
+    // Create product (it's 1 product so it won't matter if it's the first product of the last one)
+    const productId = await trendyolNotionCreateProduct({
+      title: title,
+      price: product["Trendyol'da Satılacak Fiyat (KDV Dahil)"],
+      piyasa: product["Piyasa Satış Fiyatı (KDV Dahil)"],
+      mainModalCode: product["Stok Kodu"],
+      description: product["Ürün Açıklaması"],
+    });
 
-  // Create product (it's 1 product so it won't matter if it's the first product of the last one)
-  const productId = await trendyolNotionCreateProduct({
-    title: title,
-    price: product["Trendyol'da Satılacak Fiyat (KDV Dahil)"],
-    piyasa: product["Piyasa Satış Fiyatı (KDV Dahil)"],
-    mainModalCode: product["Stok Kodu"],
-    description: product["Ürün Açıklaması"],
-  });
+    const currentModelCode: {
+      relation: string | null;
+      modelCode: string | null;
+    } = { relation: null, modelCode: null };
+    // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
+    // null !== "SB-11" => TruFe
+    // "SB-11" !== "SB-11" => False
+    // "SB-11" !== "SB-12" => True
 
-  const currentModelCode: {
-    relation: string | null;
-    modelCode: string | null;
-  } = { relation: null, modelCode: null };
-  // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
-  // null !== "SB-11" => TruFe
-  // "SB-11" !== "SB-11" => False
-  // "SB-11" !== "SB-12" => True
-
-  for (let index = 0; index < objectArray.length; index++) {
-    const obj = objectArray[index];
-    if (currentModelCode.modelCode !== obj["Model Kodu"]) {
-      const modelId = await trendyolNotionCreateModelCode({
-        modelCode: obj["Model Kodu"],
-        relationId: productId,
-      });
-      await trendyolNotionCreateBarcode({
-        barcode: obj["Barkod"],
-        relationId: modelId,
-      });
-      currentModelCode.modelCode = obj["Model Kodu"];
-      currentModelCode.relation = modelId;
-    } else {
-      await trendyolNotionCreateBarcode({
-        barcode: obj["Barkod"],
-        // This will definitely will not run on the first time
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        relationId: currentModelCode.relation!,
-      });
+    for (let index = 0; index < objectArray.length; index++) {
+      const obj = objectArray[index];
+      if (currentModelCode.modelCode !== obj["Model Kodu"]) {
+        const modelId = await trendyolNotionCreateModelCode({
+          modelCode: obj["Model Kodu"],
+          relationId: productId,
+        });
+        await trendyolNotionCreateBarcode({
+          barcode: obj["Barkod"],
+          relationId: modelId,
+        });
+        currentModelCode.modelCode = obj["Model Kodu"];
+        currentModelCode.relation = modelId;
+      } else {
+        await trendyolNotionCreateBarcode({
+          barcode: obj["Barkod"],
+          // This will definitely will not run on the first time
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          relationId: currentModelCode.relation!,
+        });
+      }
+      await sleep(300);
     }
-    await sleep(300);
+  } else if (company === "hepsiburada") {
+    // TODO:
+    try {
+      // Create product (it's 1 product so it won't matter if it's the first product of the last one)
+      const productId = await hepsiburadaNotionCreateProduct({
+        title: objectArray[0]["Ürün Adı"],
+        price: objectArray[0]["Fiyat"],
+        mainModalCode: props.productCode,
+        description: objectArray[0]["Ürün Açıklaması"],
+      });
+      for (let index = 0; index < objectArray.length; index++) {
+        const obj = objectArray[index];
+        await hepsiburadaNotionCreateStockCode({
+          stockCode: obj["Satıcı Stok Kodu"],
+          relationId: productId,
+        });
+        await sleep(200);
+        await hepsiburadaNotionCreateBarcode({
+          barcode: obj["Barkod"],
+          relationId: productId,
+        });
+        await sleep(200);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
@@ -411,4 +527,51 @@ export function generateStupidHepsiburadaBarcode() {
   // Construct the final EAN-13 barcode
   const barcode = digits + checkDigit;
   return `kılıfsuaraksesuar${barcode}`;
+}
+
+export async function compile(props: ProductPromptType) {
+  const {
+    path,
+    askToRunNotion,
+    productCode,
+    caseBrand,
+    title,
+    writtenPhonesList,
+    phonesList,
+    phonesCollections,
+    company,
+  } = props;
+
+  const mergedPhonesList = [
+    ...writtenPhonesList,
+    ...phonesList,
+    ...phonesCollections,
+  ];
+  const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
+  generateInformationLoop({
+    ...props,
+    mergedPhonesList,
+    objectArray,
+  });
+
+  try {
+    // Write to excel file
+    writeToExcel(
+      objectArray,
+      cleanUp(path, false).replace(/"/gi, ""),
+      productCode,
+      caseBrand,
+      company
+    );
+
+    if (askToRunNotion)
+      await runNotion({
+        title: title,
+        objectArray: objectArray,
+        company: company,
+        productCode,
+      });
+  } catch (error) {
+    console.log(error);
+  }
 }

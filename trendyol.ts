@@ -1,30 +1,20 @@
-import {
-  cleanUp,
-  generateInformationLoop,
-  registerPrompts,
-  runNotion,
-  showPrompt,
-  writeToExcel,
-} from "./helpers/utils";
+import { compile, registerPrompts, showPrompt } from "./helpers/utils";
 import configFileData from "./config/config.json";
 
 import {
-  KDVT,
   caseBrandsT,
   caseMaterialsT,
   caseTypesT,
-  categoryT,
-  currencyT,
   guaranteePeriodsT,
   phonesT,
 } from "./variables/variables";
-import { ProductPromptType, TrendyolFields } from "./types/types";
-import { promptQuestionsT } from "./variables/prompts";
+import { ProductPromptType } from "./types/types";
+import { productPrompt } from "./variables/prompts";
 
 registerPrompts();
 (async () => {
   const result = (await showPrompt(
-    promptQuestionsT({
+    productPrompt({
       company: "trendyol",
       configFileData,
       caseBrands: caseBrandsT,
@@ -36,52 +26,6 @@ registerPrompts();
   )) as ProductPromptType;
   compile(result);
 })();
-
-// - Helpers
-
-async function compile(props: ProductPromptType) {
-  const {
-    path,
-    askToRunNotion,
-    productCode,
-    caseBrand,
-    title,
-    writtenPhonesList,
-    phonesList,
-    phonesCollections,
-  } = props;
-
-  const mergedPhonesList = [
-    ...writtenPhonesList,
-    ...phonesList,
-    ...phonesCollections,
-  ];
-  const objectArray: TrendyolFields[] = [];
-  generateInformationLoop({
-    ...props,
-    mergedPhonesList,
-    category: categoryT,
-    currency: currencyT,
-    KDV: KDVT,
-    objectArray: objectArray,
-    mainList: phonesT,
-  });
-
-  try {
-    // Write to excel file
-    writeToExcel(
-      objectArray,
-      cleanUp(path, false).replace(/"/gi, ""),
-      productCode,
-      caseBrand,
-      "trendyol"
-    );
-
-    if (askToRunNotion) await runNotion(title, objectArray);
-  } catch (error) {
-    console.log(error);
-  }
-}
 
 // TODO: useCollections config.json
 // TODO: Create without the list because most of redmi phone is not included or create secondary list and merge it but the merged list should not be included in the Telefon Modeli

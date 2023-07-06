@@ -1,13 +1,9 @@
 import {
-  KDVH,
   caseBrandsH,
   caseTypesH,
   colorsH,
-  crapH,
-  guaranteeTypesH,
   caseMaterialsH,
   phonesH,
-  waterProofH,
   caseBrandsT,
   phonesT,
   categoryT,
@@ -16,6 +12,7 @@ import {
   caseMaterialsT,
   caseTypesT,
   guaranteePeriodsT,
+  KDVH,
 } from "../variables/variables";
 
 import configFileObject from "../config/config.json";
@@ -56,6 +53,37 @@ export interface TrendyolFields {
   "Uyumlu Marka": (typeof caseBrandsT)[number];
 }
 
+export interface HepsiburadaFields {
+  "Ürün Adı": string;
+  "Satıcı Stok Kodu": string;
+  Barkod: string;
+  "Varyant Grup Id": string;
+  "Ürün Açıklaması": string;
+  Marka: string;
+  Desi: number;
+  KDV: (typeof KDVH)[3];
+  "Garanti Süresi (Ay)": 0;
+  Görsel1: unknown;
+  Görsel2: unknown;
+  Görsel3: unknown;
+  Görsel4: unknown;
+  Görsel5: unknown;
+  Fiyat: number;
+  Stok: number;
+  Video: unknown;
+  "Uyumlu Model": unknown; // TODO: it might not match or it won't
+  Renk: (typeof colorsH)[number][];
+  Seçenek: string[];
+  "Telefon Modeli": (typeof phonesH)[number][];
+  "Uyumlu Marka": (typeof caseBrandsH)[number];
+  "Garanti Tipi": unknown;
+  "Su Geçirmezlik": unknown;
+  "Ürün  Kodu": unknown;
+  "Malzeme Türü": (typeof caseMaterialsH)[number] | "";
+  "Garanti Tipi2": unknown;
+  "Kılıf Tipi": (typeof caseTypesH)[number] | "";
+}
+
 export type CompanyType = "trendyol" | "hepsiburada";
 
 export type PromptQuestionFunctionProps = {
@@ -78,6 +106,8 @@ export type PromptQuestionFunctionProps = {
       caseBrands: typeof caseBrandsH;
     }
 );
+
+// TODO: Is empty array necessary? What about undefined or null?
 
 export type TrendyolPromptType = {
   company: "trendyol";
@@ -117,36 +147,6 @@ export type ProductPromptType = {
   // Features
 } & (HepsiburadaPromptType | TrendyolPromptType);
 
-export interface promptAnswersH {
-  title: string;
-  // sellerStockCode: string; // = mainModalCode
-  barcode: string;
-  // groupId: string; // gets generated
-  productDescription: string;
-  brand: string | undefined;
-  desi: string; // number
-  KDV: (typeof KDVH)[number];
-  guaranteePeriod: string; // number
-  // IMAGES
-  price: string;
-  stockAmount: string;
-  // VIDEO
-  phoneBrandCrap: (typeof crapH)[number][] | undefined;
-  colors: (typeof colorsH)[number][];
-  options: string[];
-  phonesList: (typeof phonesH)[number][];
-  caseBrand: (typeof caseBrandsH)[number];
-  guaranteeType: (typeof guaranteeTypesH)[number] | undefined;
-  waterProof: (typeof waterProofH)[number] | undefined;
-  material: (typeof caseMaterialsH)[number];
-  caseType: (typeof caseTypesH)[number];
-
-  // Helpers
-  mainModalCode: string;
-  phoneType: string;
-  path: string;
-}
-
 export type TrendyolPhonesCollection = {
   company: "trendyol";
   phonesCollection: (typeof phonesT)[number][];
@@ -159,3 +159,8 @@ export type HepsiburadaPhonesCollection = {
 export type phonesCollectionPromptType = {
   collectionName: string;
 } & (TrendyolPhonesCollection | HepsiburadaPhonesCollection);
+
+export type InformationLoopType = {
+  objectArray: object[];
+  mergedPhonesList: string[];
+} & ProductPromptType;

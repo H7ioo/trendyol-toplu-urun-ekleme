@@ -26,7 +26,7 @@ import {
 import phonesCollectionData from "../config/phonesCollections.json";
 
 // Questions collection
-export const promptQuestionsT = (props: PromptQuestionFunctionProps) => {
+export const productPrompt = (props: PromptQuestionFunctionProps) => {
   const {
     company,
     configFileData,
@@ -186,6 +186,34 @@ export const promptQuestionsT = (props: PromptQuestionFunctionProps) => {
       },
       validate: lengthValidator,
       suffix: ":",
+      when: company === "trendyol",
+    },
+
+    {
+      type: "search-checkbox",
+      name: "colors",
+      message: "Renkleri seçiniz",
+      choices: company === "hepsiburada" ? props.colors : [],
+      validate: (input: string[]) => {
+        console.log(`Count: ${input.length}`);
+        return true;
+      },
+      suffix: ":",
+      when: company === "hepsiburada",
+    },
+    {
+      type: "input",
+      name: "options",
+      message: "Seçenekler yazınız (aralarında virgül koyarak)",
+      filter: (input) => {
+        return cleanUp(input)
+          .split(",")
+          .map((option) => {
+            return capitalizeLetters(option);
+          });
+      },
+      suffix: ":",
+      when: company === "hepsiburada",
     },
     {
       type: "input",
