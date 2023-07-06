@@ -24,17 +24,8 @@ import { productPrompt } from "./variables/prompts";
 import { prompt } from "inquirer";
 
 registerPrompts();
-(async () => {
-  const { company } = (await prompt([
-    {
-      type: "search-list",
-      name: "company",
-      message: "Şirket seçiniz",
-      choices: companies,
-      validate: lengthValidator,
-      suffix: ":",
-    },
-  ])) as { company: CompanyType };
+
+const companySwitch = async (company: CompanyType) => {
   switch (company) {
     case "trendyol":
       (
@@ -67,18 +58,21 @@ registerPrompts();
       )?.then((result: ProductPromptType) => compile(result));
       break;
   }
-  // const result = (await showPrompt(
-  //   productPrompt({
-  //     company: "trendyol",
-  //     configFileData,
-  //     caseBrands: caseBrandsT,
-  //     caseMaterials: caseMaterialsT,
-  //     caseTypes: caseTypesT,
-  //     phonesList: phonesT,
-  //     guaranteePeriods: guaranteePeriodsT,
-  //   })
-  // )) as ProductPromptType;
-  // compile(result);
+};
+
+(async () => {
+  const { company } = (await prompt([
+    {
+      type: "search-list",
+      name: "company",
+      message: "Şirket seçiniz",
+      choices: companies,
+      validate: lengthValidator,
+      suffix: ":",
+    },
+  ])) as { company: CompanyType };
+
+  await companySwitch(company);
 })();
 
 // TODO: useCollections config.json
@@ -90,7 +84,3 @@ registerPrompts();
 // TODO: Check if Main Code exists
 // TODO: use collection and all other phones methods. Some times you need to extend 1 phone. Just make sure that they are combined. Create typed collection for example {trendyolList: ["iPhone 11"], outOfTrendyolList: ["G1s 2001"]}
 // TODO: writeToExcel Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
-
-// TODO: Choice between Hepsiburada and Trendyol. Instead of exporting 2 variables, 1 for trendyol and another for hepsiburada we just have config file. If we choose hepsiburada it will get hepsiburada's variables. The problem is that it's not consistent. Hepsiburada has more variables, but we can just not use it.
-// import * as variables from "./PATH_DEPENDING_ON_CHOICE"
-// import {x} from "./PATH_DEPENDING_ON_CHOICE"

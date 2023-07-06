@@ -362,7 +362,7 @@ export async function generateInformationLoop(props: InformationLoopType) {
         // Example: Kırmızı
         const color = colors[j];
         // Example: SuarSB-11Pro-Sari-691
-        // TODO: check if there is a better way
+        // TODO: check if there is a better way to the barcode
         // const barcode = `${capitalizeLetters(
         //   trademark ?? ""
         // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
@@ -441,56 +441,60 @@ export async function runNotion(
   const { title, objectArray, company } = props;
   if (company === "trendyol") {
     const product = objectArray[0];
-    // Create product (it's 1 product so it won't matter if it's the first product of the last one)
-    const productId = await trendyolNotionCreateProduct({
-      title: title,
-      price: product["Trendyol'da Satılacak Fiyat (KDV Dahil)"],
-      piyasa: product["Piyasa Satış Fiyatı (KDV Dahil)"],
-      mainModalCode: product["Stok Kodu"],
-      description: product["Ürün Açıklaması"],
-    });
+    try {
+      // Create product (it's 1 product so it won't matter if it's the first product of the last one)
+      const productId = await trendyolNotionCreateProduct({
+        title: title,
+        price: product["Trendyol'da Satılacak Fiyat (KDV Dahil)"],
+        piyasa: product["Piyasa Satış Fiyatı (KDV Dahil)"],
+        mainModalCode: product["Stok Kodu"],
+        description: product["Ürün Açıklaması"],
+      });
 
-    const currentModelCode: {
-      relation: string | null;
-      modelCode: string | null;
-    } = { relation: null, modelCode: null };
-    // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
-    // null !== "SB-11" => TruFe
-    // "SB-11" !== "SB-11" => False
-    // "SB-11" !== "SB-12" => True
+      const currentModelCode: {
+        relation: string | null;
+        modelCode: string | null;
+      } = { relation: null, modelCode: null };
+      // Loop over each object, If the model code is the same as the last one then don't create any, it it is not then create new model code
+      // null !== "SB-11" => TruFe
+      // "SB-11" !== "SB-11" => False
+      // "SB-11" !== "SB-12" => True
 
-    for (let index = 0; index < objectArray.length; index++) {
-      const obj = objectArray[index];
-      if (currentModelCode.modelCode !== obj["Model Kodu"]) {
-        const modelId = await trendyolNotionCreateModelCode({
-          modelCode: obj["Model Kodu"],
-          relationId: productId,
-        });
-        await trendyolNotionCreateBarcode({
-          barcode: obj["Barkod"],
-          relationId: modelId,
-        });
-        currentModelCode.modelCode = obj["Model Kodu"];
-        currentModelCode.relation = modelId;
-      } else {
-        await trendyolNotionCreateBarcode({
-          barcode: obj["Barkod"],
-          // This will definitely will not run on the first time
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          relationId: currentModelCode.relation!,
-        });
+      for (let index = 0; index < objectArray.length; index++) {
+        const obj = objectArray[index];
+        if (currentModelCode.modelCode !== obj["Model Kodu"]) {
+          const modelId = await trendyolNotionCreateModelCode({
+            modelCode: obj["Model Kodu"],
+            relationId: productId,
+          });
+          await trendyolNotionCreateBarcode({
+            barcode: obj["Barkod"],
+            relationId: modelId,
+          });
+          currentModelCode.modelCode = obj["Model Kodu"];
+          currentModelCode.relation = modelId;
+        } else {
+          await trendyolNotionCreateBarcode({
+            barcode: obj["Barkod"],
+            // This will definitely will not run on the first time
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            relationId: currentModelCode.relation!,
+          });
+        }
+        await sleep(300);
       }
-      await sleep(300);
+    } catch (error) {
+      console.log(error);
     }
   } else if (company === "hepsiburada") {
-    // TODO:
+    const product = objectArray[0];
     try {
       // Create product (it's 1 product so it won't matter if it's the first product of the last one)
       const productId = await hepsiburadaNotionCreateProduct({
-        title: objectArray[0]["Ürün Adı"],
-        price: objectArray[0]["Fiyat"],
+        title: product["Ürün Adı"],
+        price: product["Fiyat"],
         mainModalCode: props.productCode,
-        description: objectArray[0]["Ürün Açıklaması"],
+        description: product["Ürün Açıklaması"],
       });
       for (let index = 0; index < objectArray.length; index++) {
         const obj = objectArray[index];
@@ -498,12 +502,12 @@ export async function runNotion(
           stockCode: obj["Satıcı Stok Kodu"],
           relationId: productId,
         });
-        await sleep(200);
+        await sleep(300);
         await hepsiburadaNotionCreateBarcode({
           barcode: obj["Barkod"],
           relationId: productId,
         });
-        await sleep(200);
+        await sleep(300);
       }
     } catch (error) {
       console.log(error);
