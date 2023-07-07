@@ -13,6 +13,7 @@ import {
   categoryT,
   currencyT,
   emptyStringWord,
+  phonesH,
   phonesT,
 } from "../variables/variables";
 import {
@@ -342,7 +343,7 @@ export async function generateInformationLoop(props: InformationLoopType) {
       // Example: Iphone 11 Pro (from Excel Sheet)
       const regex = removePhoneBrandRegEx(phoneBrand);
       // Example: Iphone 11 Pro (from Excel Sheet)
-      const phoneName = mergedPhonesList[i] as (typeof phonesT)[number];
+      const phoneName = mergedPhonesList[i] as (typeof phonesH)[number];
       // Example: 11 Pro
       const phoneNameWithoutBrand = capitalizeLetters(
         cleanUp(
@@ -377,7 +378,7 @@ export async function generateInformationLoop(props: InformationLoopType) {
         for (let x = 0; x < props.options.length; x++) {
           const option = props.options[x];
           // Fields
-          const fields = {
+          const fields: HepsiburadaFields = {
             "Ürün Adı": productTitle,
             "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
             Barkod: barcode,
@@ -392,13 +393,13 @@ export async function generateInformationLoop(props: InformationLoopType) {
             Görsel3: "",
             Görsel4: "",
             Görsel5: "",
-            Fiyat: price,
+            Fiyat: convertToCommaNumber(price),
             Stok: stockAmount,
             Video: "",
             "Uyumlu Model": "", // TODO: it might not match or it won't
             Renk: color,
             Seçenek: option,
-            "Telefon Modeli": phoneName,
+            "Telefon Modeli": phonesH.includes(phoneName) ? phoneName : "",
             "Uyumlu Marka": caseBrand,
             "Garanti Tipi": "",
             "Su Geçirmezlik": "",
@@ -493,7 +494,7 @@ export async function runNotion(
       // Create product (it's 1 product so it won't matter if it's the first product of the last one)
       const productId = await hepsiburadaNotionCreateProduct({
         title: product["Ürün Adı"],
-        price: product["Fiyat"],
+        price: convertToNumber(product["Fiyat"]),
         mainModalCode: props.productCode,
         description: product["Ürün Açıklaması"],
       });
@@ -584,4 +585,8 @@ export async function compile(props: ProductPromptType) {
   } catch (error) {
     console.log(error);
   }
+}
+
+export function convertToCommaNumber(number: number) {
+  return number.toString().replace(/\./gi, ",");
 }

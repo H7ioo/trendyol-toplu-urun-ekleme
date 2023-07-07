@@ -68,13 +68,13 @@ export interface HepsiburadaFields {
   Görsel3: unknown;
   Görsel4: unknown;
   Görsel5: unknown;
-  Fiyat: number;
+  Fiyat: string;
   Stok: number;
   Video: unknown;
   "Uyumlu Model": unknown;
-  Renk: (typeof colorsH)[number][];
-  Seçenek: string[];
-  "Telefon Modeli": (typeof phonesH)[number][];
+  Renk: (typeof colorsH)[number];
+  Seçenek: string;
+  "Telefon Modeli": (typeof phonesH)[number][] | string;
   "Uyumlu Marka": (typeof caseBrandsH)[number];
   "Garanti Tipi": unknown;
   "Su Geçirmezlik": unknown;
