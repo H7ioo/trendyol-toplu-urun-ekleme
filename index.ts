@@ -26,38 +26,37 @@ import { prompt } from "inquirer";
 registerPrompts();
 
 const companySwitch = async (company: CompanyType) => {
+  let result;
   switch (company) {
     case "trendyol":
-      (
-        await showPrompt(
-          productPrompt({
-            company: "trendyol",
-            configFileData,
-            caseBrands: caseBrandsT,
-            caseMaterials: caseMaterialsT,
-            caseTypes: caseTypesT,
-            phonesList: phonesT,
-            guaranteePeriods: guaranteePeriodsT,
-          })
-        )
-      )?.then((result: ProductPromptType) => compile(result));
+      result = await showPrompt(
+        productPrompt({
+          company: "trendyol",
+          configFileData,
+          caseBrands: caseBrandsT,
+          caseMaterials: caseMaterialsT,
+          caseTypes: caseTypesT,
+          phonesList: phonesT,
+          guaranteePeriods: guaranteePeriodsT,
+        })
+      );
       break;
     case "hepsiburada":
-      (
-        await showPrompt(
-          productPrompt({
-            company: "hepsiburada",
-            configFileData,
-            caseBrands: caseBrandsH,
-            caseMaterials: caseMaterialsH,
-            caseTypes: caseTypesH,
-            phonesList: phonesH,
-            colors: colorsH,
-          })
-        )
-      )?.then((result: ProductPromptType) => compile(result));
+      result = await showPrompt(
+        productPrompt({
+          company: "hepsiburada",
+          configFileData,
+          caseBrands: caseBrandsH,
+          caseMaterials: caseMaterialsH,
+          caseTypes: caseTypesH,
+          phonesList: phonesH,
+          colors: colorsH,
+        })
+      );
       break;
   }
+  // TODO: After notion adding is done it's not exiting the console - I forget to put await. this might fix the problem
+  await compile({ ...result, company } as ProductPromptType);
 };
 
 (async () => {

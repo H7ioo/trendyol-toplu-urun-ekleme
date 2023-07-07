@@ -27,9 +27,7 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
     caseMaterials,
     caseBrands,
     caseTypes,
-    // guaranteePeriod
   } = props;
-  // TODO: Use 1 question instead
   // TODO: Found a solution for type safety
   const promptCollection: QuestionCollection = [
     // # MAIN Questions

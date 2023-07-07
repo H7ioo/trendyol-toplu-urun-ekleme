@@ -23,6 +23,7 @@ import {
   trendyolNotionCreateModelCode,
   trendyolNotionCreateProduct,
 } from "../lib/notion";
+import { CompanyType } from "../types/types";
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));

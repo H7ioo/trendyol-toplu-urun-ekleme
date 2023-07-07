@@ -71,7 +71,7 @@ export interface HepsiburadaFields {
   Fiyat: number;
   Stok: number;
   Video: unknown;
-  "Uyumlu Model": unknown; // TODO: it might not match or it won't
+  "Uyumlu Model": unknown;
   Renk: (typeof colorsH)[number][];
   Seçenek: string[];
   "Telefon Modeli": (typeof phonesH)[number][];
