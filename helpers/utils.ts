@@ -17,14 +17,12 @@ import {
   phonesT,
 } from "../variables/variables";
 import {
-  hepsiburadaNotionCreateBarcode,
   hepsiburadaNotionCreateProduct,
   hepsiburadaNotionCreateStockCode,
   trendyolNotionCreateBarcode,
   trendyolNotionCreateModelCode,
   trendyolNotionCreateProduct,
 } from "../lib/notion";
-import { CompanyType } from "../types/types";
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -253,7 +251,7 @@ export const removePhoneBrandRegEx = (phoneType: string) => {
   return new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
 };
 
-export async function generateInformationLoop(props: InformationLoopType) {
+export function generateInformationLoop(props: InformationLoopType) {
   const {
     mergedPhonesList,
     phoneBrand,
@@ -493,7 +491,7 @@ export async function runNotion(
     try {
       // Create product (it's 1 product so it won't matter if it's the first product of the last one)
       const productId = await hepsiburadaNotionCreateProduct({
-        title: product["Ürün Adı"],
+        title: title,
         price: convertToNumber(product["Fiyat"]),
         mainModalCode: props.productCode,
         description: product["Ürün Açıklaması"],
@@ -505,11 +503,12 @@ export async function runNotion(
           relationId: productId,
         });
         await sleep(300);
-        await hepsiburadaNotionCreateBarcode({
-          barcode: obj["Barkod"],
-          relationId: productId,
-        });
-        await sleep(300);
+        // ! Barcode in hepsiburada is meaningless
+        // await hepsiburadaNotionCreateBarcode({
+        //   barcode: obj["Barkod"],
+        //   relationId: productId,
+        // });
+        // await sleep(300);
       }
     } catch (error) {
       console.log(error);

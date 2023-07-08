@@ -55,8 +55,8 @@ const companySwitch = async (company: CompanyType) => {
       );
       break;
   }
-  // TODO: After notion adding is done it's not exiting the console - I forget to put await. this might fix the problem
   await compile({ ...result, company } as ProductPromptType);
+  // TODO: After notion adding is done it's not exiting the console
 };
 
 (async () => {
@@ -84,4 +84,5 @@ const companySwitch = async (company: CompanyType) => {
 // TODO: use collection and all other phones methods. Some times you need to extend 1 phone. Just make sure that they are combined. Create typed collection for example {trendyolList: ["iPhone 11"], outOfTrendyolList: ["G1s 2001"]}
 // TODO: writeToExcel Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
 
-// TODO: Hepsiburada convert number to string that is "159,90"
+// TODO: Check if main code exists in notion
+// TODO: if koleksion is 0 don't prompt it

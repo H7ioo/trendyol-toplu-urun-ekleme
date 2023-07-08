@@ -10,6 +10,9 @@ const envSchema = z.object({
   TRENDYOL_PHONES_DATABASE: z.string(),
   TRENDYOL_PRODUCT_MODAL_CODE_DATABASE: z.string(),
   TRENDYOL_PRODUCT_BARCODE_DATABASE: z.string(),
+  HEPSIBURADA_PRODUCT_DATABASE: z.string(),
+  HEPSIBURADA_PRODUCT_MODAL_CODE_DATABASE: z.string(),
+  HEPSIBURADA_PRODUCT_BARCODE_DATABASE: z.string(),
 });
 
 export const ENV = envSchema.parse(process.env);

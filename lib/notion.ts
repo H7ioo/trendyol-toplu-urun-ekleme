@@ -187,7 +187,7 @@ export const hepsiburadaNotionCreateProduct = async ({
 }: HepsiburadaNotionProps["createProduct"]) => {
   const productObj: WithAuth<CreatePageParameters> = {
     parent: {
-      database_id: ENV.TRENDYOL_PRODUCT_DATABASE,
+      database_id: ENV.HEPSIBURADA_PRODUCT_DATABASE,
     },
     children: [
       {
@@ -205,7 +205,7 @@ export const hepsiburadaNotionCreateProduct = async ({
       },
     ],
     properties: {
-      Name: {
+      "Ürün adı": {
         type: "title",
         title: [
           {
@@ -238,7 +238,7 @@ export const hepsiburadaNotionCreateStockCode = async ({
 }: HepsiburadaNotionProps["createStockCode"]) => {
   const modelObj: WithAuth<CreatePageParameters> = {
     parent: {
-      database_id: ENV.TRENDYOL_PRODUCT_MODAL_CODE_DATABASE,
+      database_id: ENV.HEPSIBURADA_PRODUCT_MODAL_CODE_DATABASE,
     },
     properties: {
       "Stok Kodu": {
@@ -270,7 +270,7 @@ export const hepsiburadaNotionCreateBarcode = async ({
 }: HepsiburadaNotionProps["createBarcode"]) => {
   const barcodeObj: WithAuth<CreatePageParameters> = {
     parent: {
-      database_id: ENV.TRENDYOL_PRODUCT_BARCODE_DATABASE,
+      database_id: ENV.HEPSIBURADA_PRODUCT_BARCODE_DATABASE,
     },
     properties: {
       Barkod: {
