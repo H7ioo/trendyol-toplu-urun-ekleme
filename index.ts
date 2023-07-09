@@ -56,7 +56,6 @@ const companySwitch = async (company: CompanyType) => {
       break;
   }
   await compile({ ...result, company } as ProductPromptType);
-  // TODO: After notion adding is done it's not exiting the console
 };
 
 (async () => {
@@ -72,6 +71,8 @@ const companySwitch = async (company: CompanyType) => {
   ])) as { company: CompanyType };
 
   await companySwitch(company);
+  // Quit
+  process.exit(0);
 })();
 
 // TODO: useCollections config.json
@@ -85,4 +86,5 @@ const companySwitch = async (company: CompanyType) => {
 // TODO: writeToExcel Don't override props. Just append to them. (for now it works but not in the way that I want. It should not replace props it should append rows only.)
 
 // TODO: Check if main code exists in notion
-// TODO: if koleksion is 0 don't prompt it
+
+// TODO: Run hepsiburada and trendyol in sync (at the same time)

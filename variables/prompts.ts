@@ -109,14 +109,14 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       message: "Telefon koleksiyonu seçiniz",
       choices: () => {
         // Get only THIS company array (trendyol)
-        const onlycompanyArray = phonesCollectionData.phonesCollections.filter(
+        const onlyCompanyArray = phonesCollectionData.phonesCollections.filter(
           (collection) => {
             const c = collection as phonesCollectionPromptType;
             return c.company === company;
           }
         );
         // Get all collection names and show an array with it
-        const collectionNames = onlycompanyArray.map((collection) => {
+        const collectionNames = onlyCompanyArray.map((collection) => {
           const c = collection as phonesCollectionPromptType;
           return `${c.collectionName} => ${JSON.stringify(c.phonesCollection)}`;
         });
@@ -135,6 +135,17 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
           }
         );
         return collections.map((collection) => collection.phonesCollection);
+      },
+      when: () => {
+        const onlyCompanyArray = phonesCollectionData.phonesCollections.filter(
+          (collection) => {
+            const c = collection as phonesCollectionPromptType;
+            return c.company === company;
+          }
+        );
+
+        if (onlyCompanyArray.length <= 0) return false;
+        return true;
       },
       suffix: ":",
     },

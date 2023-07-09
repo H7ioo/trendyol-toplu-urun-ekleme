@@ -11,6 +11,7 @@ import {
   KDVH,
   KDVT,
   categoryT,
+  crapH,
   currencyT,
   emptyStringWord,
   phonesH,
@@ -341,7 +342,8 @@ export function generateInformationLoop(props: InformationLoopType) {
       // Example: Iphone 11 Pro (from Excel Sheet)
       const regex = removePhoneBrandRegEx(phoneBrand);
       // Example: Iphone 11 Pro (from Excel Sheet)
-      const phoneName = mergedPhonesList[i] as (typeof phonesH)[number];
+      const phoneName = mergedPhonesList[i] as (typeof phonesH)[number] &
+        (typeof crapH)[number];
       // Example: 11 Pro
       const phoneNameWithoutBrand = capitalizeLetters(
         cleanUp(
@@ -394,7 +396,7 @@ export function generateInformationLoop(props: InformationLoopType) {
             Fiyat: convertToCommaNumber(price),
             Stok: stockAmount,
             Video: "",
-            "Uyumlu Model": "", // TODO: it might not match or it won't
+            "Uyumlu Model": crapH.includes(phoneName) ? phoneName : "",
             Renk: color,
             Seçenek: option,
             "Telefon Modeli": phonesH.includes(phoneName) ? phoneName : "",
