@@ -4,7 +4,6 @@ import {
   registerPrompts,
   showPrompt,
 } from "./helpers/utils";
-import configFileData from "./config/config.json";
 
 import {
   caseBrandsH,
@@ -19,58 +18,75 @@ import {
   phonesH,
   phonesT,
 } from "./variables/variables";
-import { CompanyType, ProductPromptType } from "./types/types";
+import {
+  CompanyType,
+  ProductPromptType,
+  PromptQuestionFunctionProps,
+} from "./types/types";
 import { productPrompt } from "./variables/prompts";
 import { prompt } from "inquirer";
 
 registerPrompts();
 
-const companySwitch = async (company: CompanyType) => {
-  let result;
-  switch (company) {
-    case "trendyol":
-      result = await showPrompt(
-        productPrompt({
-          company: "trendyol",
-          configFileData,
-          caseBrands: caseBrandsT,
-          caseMaterials: caseMaterialsT,
-          caseTypes: caseTypesT,
-          phonesList: phonesT,
-          guaranteePeriods: guaranteePeriodsT,
-        })
-      );
-      break;
-    case "hepsiburada":
-      result = await showPrompt(
-        productPrompt({
-          company: "hepsiburada",
-          configFileData,
-          caseBrands: caseBrandsH,
-          caseMaterials: caseMaterialsH,
-          caseTypes: caseTypesH,
-          phonesList: phonesH,
-          colors: colorsH,
-        })
-      );
-      break;
+const companySwitch = async (companies: CompanyType[]) => {
+  const companiesData = {
+    trendyol: {
+      company: "trendyol",
+      caseBrands: caseBrandsT,
+      caseMaterials: caseMaterialsT,
+      caseTypes: caseTypesT,
+      phonesList: phonesT,
+      guaranteePeriods: guaranteePeriodsT,
+    },
+    hepsiburada: {
+      company: "hepsiburada",
+      caseBrands: caseBrandsH,
+      caseMaterials: caseMaterialsH,
+      caseTypes: caseTypesH,
+      phonesList: phonesH,
+      colors: colorsH,
+    },
+  };
+
+  const data = companies.map((company) => {
+    return companiesData[company] as PromptQuestionFunctionProps;
+  });
+
+  const [mainCollection, companyBasedCollections, configCollection] =
+    productPrompt(data);
+
+  const mainAnswers = await showPrompt(mainCollection);
+  const companyAnswers = [];
+  for (let index = 0; index < companyBasedCollections.length; index++) {
+    const company = companyBasedCollections[index];
+    const companyAnswer = await showPrompt(company);
+    companyAnswers.push(companyAnswer);
   }
-  await compile({ ...result, company } as ProductPromptType);
+  const configAnswers = await showPrompt(configCollection);
+  for (let index = 0; index < companyAnswers.length; index++) {
+    const obj = companyAnswers[index];
+    await compile({
+      ...mainAnswers,
+      ...obj,
+      ...configAnswers,
+      company: companies[index],
+    } as ProductPromptType);
+  }
 };
 
 (async () => {
-  const { company } = (await prompt([
+  const { companies: com } = (await prompt([
     {
-      type: "search-list",
-      name: "company",
+      type: "search-checkbox",
+      name: "companies",
       message: "Şirket seçiniz",
       choices: companies,
       validate: lengthValidator,
       suffix: ":",
     },
-  ])) as { company: CompanyType };
+  ])) as { companies: CompanyType[] };
 
-  await companySwitch(company);
+  await companySwitch(com);
   // Quit
   process.exit(0);
 })();

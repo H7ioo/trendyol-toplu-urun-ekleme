@@ -86,9 +86,7 @@ export interface HepsiburadaFields {
 
 export type CompanyType = "trendyol" | "hepsiburada";
 
-export type PromptQuestionFunctionProps = {
-  configFileData: ConfigFileObjectType;
-} & (
+export type PromptQuestionFunctionProps =
   | {
       company: "trendyol";
       phonesList: typeof phonesT;
@@ -104,8 +102,7 @@ export type PromptQuestionFunctionProps = {
       caseMaterials: typeof caseMaterialsH;
       caseTypes: typeof caseTypesH;
       caseBrands: typeof caseBrandsH;
-    }
-);
+    };
 
 // TODO: Is empty array necessary? What about undefined or null?
 

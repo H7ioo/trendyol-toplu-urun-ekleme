@@ -17,20 +17,13 @@ import {
 } from "../types/types";
 
 import phonesCollectionData from "../config/phonesCollections.json";
+import configFileData from "../config/config.json";
 
 // Questions collection
-export const productPrompt = (props: PromptQuestionFunctionProps) => {
-  const {
-    company,
-    configFileData,
-    phonesList,
-    caseMaterials,
-    caseBrands,
-    caseTypes,
-  } = props;
+export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
   // TODO: Found a solution for type safety
-  const promptCollection: QuestionCollection = [
-    // # MAIN Questions
+
+  const mainCollection: QuestionCollection = [
     {
       type: "input",
       name: "title",
@@ -59,13 +52,6 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
         return cleanUp(input).toUpperCase();
       },
       validate: lengthValidator,
-      suffix: ":",
-    },
-    {
-      type: "input",
-      name: "trademark",
-      message: "Marka adı yazınız",
-      // validate: lengthValidator,
       suffix: ":",
     },
     {
@@ -103,173 +89,9 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       validate: lengthValidator,
       suffix: ":",
     },
-    {
-      type: "search-checkbox",
-      name: "phonesCollections",
-      message: "Telefon koleksiyonu seçiniz",
-      choices: () => {
-        // Get only THIS company array (trendyol)
-        const onlyCompanyArray = phonesCollectionData.phonesCollections.filter(
-          (collection) => {
-            const c = collection as phonesCollectionPromptType;
-            return c.company === company;
-          }
-        );
-        // Get all collection names and show an array with it
-        const collectionNames = onlyCompanyArray.map((collection) => {
-          const c = collection as phonesCollectionPromptType;
-          return `${c.collectionName} => ${JSON.stringify(c.phonesCollection)}`;
-        });
-        return collectionNames;
-      },
-      filter: (input: string[]) => {
-        if (!lengthValidator(input)) return [];
-        // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
-        const collectionNames = input.map((collectionName) =>
-          collectionName.split(" =>")[0].trim()
-        );
-        const collections = phonesCollectionData.phonesCollections.filter(
-          (collection) => {
-            if (collectionNames.includes(collection.collectionName))
-              return true;
-          }
-        );
-        return collections.map((collection) => collection.phonesCollection);
-      },
-      when: () => {
-        const onlyCompanyArray = phonesCollectionData.phonesCollections.filter(
-          (collection) => {
-            const c = collection as phonesCollectionPromptType;
-            return c.company === company;
-          }
-        );
-
-        if (onlyCompanyArray.length <= 0) return false;
-        return true;
-      },
-      suffix: ":",
-    },
-    {
-      type: "search-checkbox",
-      name: "phonesList",
-      message: "Telefon modelleri seçiniz",
-      choices: phonesList,
-      validate: (input: string[]) => {
-        console.log(`Count: ${input.length}`);
-        return true;
-      },
-      suffix: ":",
-    },
-
-    {
-      type: "input",
-      name: "writtenPhonesList",
-      message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
-      filter: (input: string) => {
-        if (!lengthValidator(input)) return [];
-        return cleanUp(input)
-          .split(",")
-          .map((phone) => {
-            // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
-            return capitalizeLetters(phone);
-          });
-      },
-      validate: (input: string, answers: ProductPromptType) => {
-        if (
-          lengthValidator(answers?.phonesList) ||
-          lengthValidator(answers?.phonesCollections)
-        )
-          return true;
-        return lengthValidator(input)
-          ? true
-          : "En az 1 telefon modeli yazılmalı ya da seçilmeli.";
-      },
-      suffix: ":",
-    },
-    {
-      type: "input",
-      name: "colors",
-      message: "Renkleri yazınız (aralarında virgül koyarak)",
-      filter: (input: string) => {
-        return cleanUp(input)
-          .split(",")
-          .map((colorAnswer) => {
-            // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
-            return capitalizeLetters(colorAnswer);
-          });
-      },
-      validate: lengthValidator,
-      suffix: ":",
-      when: company === "trendyol",
-    },
-
-    {
-      type: "search-checkbox",
-      name: "colors",
-      message: "Renkleri seçiniz",
-      choices: company === "hepsiburada" ? props.colors : [],
-      validate: lengthValidator,
-      suffix: ":",
-      when: company === "hepsiburada",
-    },
-    {
-      type: "input",
-      name: "options",
-      message: "Seçenekler yazınız (aralarında virgül koyarak)",
-      filter: (input) => {
-        return cleanUp(input)
-          .split(",")
-          .map((option) => {
-            return capitalizeLetters(option);
-          });
-      },
-      suffix: ":",
-      when: company === "hepsiburada",
-    },
-    {
-      type: "input",
-      name: "marketPrice",
-      message: "Piyasa fiyatı yazınız",
-      filter: (input) => {
-        if (numberValidator(input, false)) {
-          return convertToNumber(input);
-        } else {
-          return input;
-        }
-      },
-      validate: numberValidator,
-      suffix: ":",
-      when: company === "trendyol",
-    },
-    {
-      type: "search-list",
-      name: "caseMaterial",
-      message: "Materyal seçiniz",
-      choices: caseMaterials,
-      suffix: ":",
-    },
-    {
-      type: "search-list",
-      name: "caseType",
-      message: "Kılıf modeli seçiniz",
-      choices: caseTypes,
-      suffix: ":",
-    },
-    {
-      type: "search-list",
-      name: "guaranteePeriod",
-      message: "Garanti süresi seçiniz",
-      choices: company === "trendyol" ? props.guaranteePeriods : [],
-      suffix: ":",
-      when: company === "trendyol",
-    },
-    {
-      type: "search-list",
-      name: "caseBrand",
-      message: "Uyumlu marka seçiniz",
-      choices: caseBrands,
-      suffix: ":",
-    },
+  ];
+  const companyBasedCollections: QuestionCollection[] = [];
+  const configCollection: QuestionCollection = [
     {
       type: "input",
       name: configFileData.path.name,
@@ -303,8 +125,191 @@ export const productPrompt = (props: PromptQuestionFunctionProps) => {
       default: true,
     },
   ];
+  for (let index = 0; index < companies.length; index++) {
+    const companyData = companies[index];
+    const { caseBrands, caseMaterials, caseTypes, company, phonesList } =
+      companyData;
+    const questionCollection: QuestionCollection = [
+      {
+        type: "input",
+        name: "trademark",
+        message: "Marka adı yazınız",
+        // validate: lengthValidator,
+        suffix: ` (${companyData.company}):`,
+      },
+      {
+        type: "search-checkbox",
+        name: "phonesCollections",
+        message: "Telefon koleksiyonu seçiniz",
+        choices: () => {
+          // Get only THIS company array (trendyol)
+          const onlyCompanyArray =
+            phonesCollectionData.phonesCollections.filter((collection) => {
+              const c = collection as phonesCollectionPromptType;
+              return c.company === company;
+            });
+          // Get all collection names and show an array with it
+          const collectionNames = onlyCompanyArray.map((collection) => {
+            const c = collection as phonesCollectionPromptType;
+            return `${c.collectionName} => ${JSON.stringify(
+              c.phonesCollection
+            )}`;
+          });
+          return collectionNames;
+        },
+        filter: (input: string[]) => {
+          if (!lengthValidator(input)) return [];
+          // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
+          const collectionNames = input.map((collectionName) =>
+            collectionName.split(" =>")[0].trim()
+          );
+          const collections = phonesCollectionData.phonesCollections.filter(
+            (collection) => {
+              if (collectionNames.includes(collection.collectionName))
+                return true;
+            }
+          );
+          return collections.map((collection) => collection.phonesCollection);
+        },
+        when: () => {
+          const onlyCompanyArray =
+            phonesCollectionData.phonesCollections.filter((collection) => {
+              const c = collection as phonesCollectionPromptType;
+              return c.company === company;
+            });
 
-  return promptCollection;
+          if (onlyCompanyArray.length <= 0) return false;
+          return true;
+        },
+        suffix: ` (${companyData.company}):`,
+      },
+      {
+        type: "search-checkbox",
+        name: "phonesList",
+        message: "Telefon modelleri seçiniz",
+        choices: phonesList,
+        validate: (input: string[]) => {
+          console.log(`Count: ${input.length}`);
+          return true;
+        },
+        suffix: ` (${companyData.company}):`,
+      },
+      {
+        // TODO: Can't trim empty string
+        type: "input",
+        name: "writtenPhonesList",
+        message: "Telefon modelleri yazınız (aralarında virgül koyarak)",
+        filter: (input: string) => {
+          if (!lengthValidator(input)) return [];
+          return cleanUp(input)
+            .split(",")
+            .map((phone) => {
+              // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+              return capitalizeLetters(phone);
+            });
+        },
+        validate: (input: string, answers: ProductPromptType) => {
+          if (
+            lengthValidator(answers?.phonesList) ||
+            // Because it might not exist
+            lengthValidator(answers?.phonesCollections ?? [])
+          )
+            return true;
+          return lengthValidator(input)
+            ? true
+            : "En az 1 telefon modeli yazılmalı ya da seçilmeli.";
+        },
+        suffix: ` (${companyData.company}):`,
+      },
+      {
+        type: "input",
+        name: "colors",
+        message: "Renkleri yazınız (aralarında virgül koyarak)",
+        filter: (input: string) => {
+          return cleanUp(input)
+            .split(",")
+            .map((colorAnswer) => {
+              // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+              return capitalizeLetters(colorAnswer);
+            });
+        },
+        validate: lengthValidator,
+        suffix: ` (${companyData.company}):`,
+        when: company === "trendyol",
+      },
+
+      {
+        type: "search-checkbox",
+        name: "colors",
+        message: "Renkleri seçiniz",
+        choices: company === "hepsiburada" ? companyData.colors : [],
+        validate: lengthValidator,
+        suffix: ` (${companyData.company}):`,
+        when: company === "hepsiburada",
+      },
+      {
+        type: "input",
+        name: "options",
+        message: "Seçenekler yazınız (aralarında virgül koyarak)",
+        filter: (input) => {
+          return cleanUp(input)
+            .split(",")
+            .map((option) => {
+              return capitalizeLetters(option);
+            });
+        },
+        suffix: ` (${companyData.company}):`,
+        when: company === "hepsiburada",
+      },
+      {
+        type: "input",
+        name: "marketPrice",
+        message: "Piyasa fiyatı yazınız",
+        filter: (input) => {
+          if (numberValidator(input, false)) {
+            return convertToNumber(input);
+          } else {
+            return input;
+          }
+        },
+        validate: numberValidator,
+        suffix: ` (${companyData.company}):`,
+        when: company === "trendyol",
+      },
+      {
+        type: "search-list",
+        name: "caseMaterial",
+        message: "Materyal seçiniz",
+        choices: caseMaterials,
+        suffix: ` (${companyData.company}):`,
+      },
+      {
+        type: "search-list",
+        name: "caseType",
+        message: "Kılıf modeli seçiniz",
+        choices: caseTypes,
+        suffix: ` (${companyData.company}):`,
+      },
+      {
+        type: "search-list",
+        name: "guaranteePeriod",
+        message: "Garanti süresi seçiniz",
+        choices: company === "trendyol" ? companyData.guaranteePeriods : [],
+        suffix: ` (${companyData.company}):`,
+        when: company === "trendyol",
+      },
+      {
+        type: "search-list",
+        name: "caseBrand",
+        message: "Uyumlu marka seçiniz",
+        choices: caseBrands,
+        suffix: ` (${companyData.company}):`,
+      },
+    ];
+    companyBasedCollections.push(questionCollection);
+  }
+
+  return [mainCollection, companyBasedCollections, configCollection] as const;
 };
 
 // Questions collection
