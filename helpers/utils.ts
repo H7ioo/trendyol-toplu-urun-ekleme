@@ -238,9 +238,12 @@ export async function showPrompt(questionsCollection: QuestionCollection) {
   const result = await prompt(questionsCollection).catch((error) => {
     if (error.isTtyError) {
       console.log(error.isTtyError);
+      throw new Error(error.isTtyError);
       // Prompt couldn't be rendered in the current environment
     } else {
       console.log(error);
+      throw new Error(error);
+
       // Something else went wrong
     }
   });

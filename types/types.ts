@@ -129,7 +129,12 @@ export type HepsiburadaPromptType = {
   phonesCollections: HepsiburadaPhonesCollection["phonesCollection"];
 };
 
-export type ProductPromptType = {
+export type ConfigProductPromptType = {
+  path: string;
+  askToRunNotion: boolean;
+};
+
+export type MainProductPromptType = {
   title: string; // Lazer Panda Stantlı Kılıf
   phoneBrand: string; // iPhone, Samsung (written by user)
   productCode: string; // SB
@@ -138,11 +143,11 @@ export type ProductPromptType = {
   stockAmount: number; // 100
   productDescription: string; // <div><ul><li>Awesome Product!</li></ul></div>
   writtenPhonesList: string[];
-  // Options
-  path: string;
-  askToRunNotion: boolean;
-  // Features
-} & (HepsiburadaPromptType | TrendyolPromptType);
+};
+
+export type ProductPromptType = MainProductPromptType &
+  ConfigProductPromptType &
+  (HepsiburadaPromptType | TrendyolPromptType);
 
 export type TrendyolPhonesCollection = {
   company: "trendyol";

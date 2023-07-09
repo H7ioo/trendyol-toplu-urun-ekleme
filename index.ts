@@ -20,8 +20,12 @@ import {
 } from "./variables/variables";
 import {
   CompanyType,
+  ConfigProductPromptType,
+  HepsiburadaPromptType,
+  MainProductPromptType,
   ProductPromptType,
   PromptQuestionFunctionProps,
+  TrendyolPromptType,
 } from "./types/types";
 import { productPrompt } from "./variables/prompts";
 import { prompt } from "inquirer";
@@ -55,14 +59,20 @@ const companySwitch = async (companies: CompanyType[]) => {
   const [mainCollection, companyBasedCollections, configCollection] =
     productPrompt(data);
 
-  const mainAnswers = await showPrompt(mainCollection);
-  const companyAnswers = [];
+  const mainAnswers = (await showPrompt(
+    mainCollection
+  )) as MainProductPromptType;
+  const companyAnswers = [] as (HepsiburadaPromptType | TrendyolPromptType)[];
   for (let index = 0; index < companyBasedCollections.length; index++) {
     const company = companyBasedCollections[index];
-    const companyAnswer = await showPrompt(company);
+    const companyAnswer = (await showPrompt(company)) as
+      | HepsiburadaPromptType
+      | TrendyolPromptType;
     companyAnswers.push(companyAnswer);
   }
-  const configAnswers = await showPrompt(configCollection);
+  const configAnswers = (await showPrompt(
+    configCollection
+  )) as ConfigProductPromptType;
   for (let index = 0; index < companyAnswers.length; index++) {
     const obj = companyAnswers[index];
     await compile({
