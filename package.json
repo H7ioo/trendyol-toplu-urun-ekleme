@@ -8,7 +8,7 @@
     "config": "ts-node lib/config.ts",
     "cc": "ts-node lib/createCollection.ts",
     "dc": "ts-node lib/deleteCollection.ts",
-    "test": "ts-node notion.ts"
+    "test": "ts-node lib/notion.ts"
   },
   "keywords": [],
   "author": "",

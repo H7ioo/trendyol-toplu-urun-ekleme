@@ -11,6 +11,7 @@ import {
 } from "../helpers/utils";
 import { phonesT, phonesH } from "./variables";
 import {
+  CompanyType,
   ProductPromptType,
   PromptQuestionFunctionProps,
   phonesCollectionPromptType,
@@ -18,11 +19,24 @@ import {
 
 import phonesCollectionData from "../config/phonesCollections.json";
 import configFileData from "../config/config.json";
+import { NotionProductCodeExists } from "../lib/notion";
 
 // Questions collection
 export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
   // TODO: Found a solution for type safety
+  type ProductCodeExistFlagType = {
+    [key in CompanyType]: { flag: boolean };
+  };
 
+  // TODO: Better way so I don't have to write them one by one
+  const productCodeExistsFlag: ProductCodeExistFlagType = {
+    trendyol: {
+      flag: true,
+    },
+    hepsiburada: {
+      flag: true,
+    },
+  };
   const mainCollection: QuestionCollection = [
     {
       type: "input",
@@ -51,7 +65,30 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
       filter: (input: string) => {
         return cleanUp(input).toUpperCase();
       },
-      validate: lengthValidator,
+      validate: async (input) => {
+        // Loop over companies
+        for (let i = 0; i < companies.length; i++) {
+          const company = companies[i];
+          console.log("\nKontrol ediliyor...");
+          // Check if the product code exists
+          const productCodeExists = await NotionProductCodeExists(
+            input,
+            company.company
+          );
+          // Check the flag and product code
+          // TODO: Add to the product code don't create new one
+          // TODO: Create a new one with the same product code
+          // TODO: Get the count of the results (how many product with the same product code)
+          if (
+            productCodeExistsFlag[company.company].flag &&
+            productCodeExists
+          ) {
+            productCodeExistsFlag[company.company].flag = false;
+            return `Model kodu ${company.company}'da mevcut! Devam etmek için Enter tuşu basınız.`;
+          }
+        }
+        return lengthValidator(input);
+      },
       suffix: ":",
     },
     {
@@ -129,13 +166,14 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
     const companyData = companies[index];
     const { caseBrands, caseMaterials, caseTypes, company, phonesList } =
       companyData;
+    const suffix = companies.length > 1 ? ` (${company}):` : ":";
     const questionCollection: QuestionCollection = [
       {
         type: "input",
         name: "trademark",
         message: "Marka adı yazınız",
         // validate: lengthValidator,
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
       {
         type: "search-checkbox",
@@ -181,7 +219,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
           if (onlyCompanyArray.length <= 0) return false;
           return true;
         },
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
       {
         type: "search-checkbox",
@@ -192,7 +230,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
           console.log(`Count: ${input.length}`);
           return true;
         },
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
       {
         // TODO: Can't trim empty string
@@ -219,7 +257,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
             ? true
             : "En az 1 telefon modeli yazılmalı ya da seçilmeli.";
         },
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
       {
         type: "input",
@@ -234,7 +272,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
             });
         },
         validate: lengthValidator,
-        suffix: ` (${companyData.company}):`,
+        suffix,
         when: company === "trendyol",
       },
 
@@ -244,7 +282,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
         message: "Renkleri seçiniz",
         choices: company === "hepsiburada" ? companyData.colors : [],
         validate: lengthValidator,
-        suffix: ` (${companyData.company}):`,
+        suffix,
         when: company === "hepsiburada",
       },
       {
@@ -258,7 +296,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
               return capitalizeLetters(option);
             });
         },
-        suffix: ` (${companyData.company}):`,
+        suffix,
         when: company === "hepsiburada",
       },
       {
@@ -273,7 +311,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
           }
         },
         validate: numberValidator,
-        suffix: ` (${companyData.company}):`,
+        suffix,
         when: company === "trendyol",
       },
       {
@@ -281,21 +319,21 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
         name: "caseMaterial",
         message: "Materyal seçiniz",
         choices: caseMaterials,
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
       {
         type: "search-list",
         name: "caseType",
         message: "Kılıf modeli seçiniz",
         choices: caseTypes,
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
       {
         type: "search-list",
         name: "guaranteePeriod",
         message: "Garanti süresi seçiniz",
         choices: company === "trendyol" ? companyData.guaranteePeriods : [],
-        suffix: ` (${companyData.company}):`,
+        suffix,
         when: company === "trendyol",
       },
       {
@@ -303,13 +341,13 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
         name: "caseBrand",
         message: "Uyumlu marka seçiniz",
         choices: caseBrands,
-        suffix: ` (${companyData.company}):`,
+        suffix,
       },
     ];
     companyBasedCollections.push(questionCollection);
   }
 
-  return [mainCollection, companyBasedCollections, configCollection] as const;
+  return { mainCollection, companyBasedCollections, configCollection };
 };
 
 // Questions collection

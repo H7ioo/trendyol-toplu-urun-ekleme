@@ -1,8 +1,13 @@
 import { Client } from "@notionhq/client";
 
 import { WithAuth } from "@notionhq/client/build/src/Client";
-import { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import {
+  CreatePageParameters,
+  QueryDatabaseResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { ENV } from "../helpers/env";
+import { lengthValidator } from "../helpers/utils";
+import { CompanyType } from "../types/types";
 
 const notion = new Client({
   auth: ENV.NOTION_TOKEN,
@@ -294,4 +299,36 @@ export const hepsiburadaNotionCreateBarcode = async ({
 
   const barcodeId = barcodeRes.id;
   return barcodeId;
+};
+
+export const NotionProductCodeExists = async (
+  productCode: string,
+  company: CompanyType
+) => {
+  const notion = new Client({ auth: ENV.NOTION_TOKEN });
+  let result: QueryDatabaseResponse;
+  switch (company) {
+    case "hepsiburada":
+      result = await notion.databases.query({
+        database_id: ENV.HEPSIBURADA_PRODUCT_DATABASE,
+        filter: {
+          property: "Satıcı kodu",
+          rich_text: { equals: productCode },
+        },
+      });
+
+      break;
+    case "trendyol":
+      result = await notion.databases.query({
+        database_id: ENV.TRENDYOL_PRODUCT_DATABASE,
+        filter: {
+          property: "Ana Model Kodu",
+          rich_text: { equals: productCode },
+        },
+      });
+
+      break;
+  }
+
+  return result.results.length > 0 ? true : false;
 };

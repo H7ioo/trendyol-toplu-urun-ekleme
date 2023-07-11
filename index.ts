@@ -3,6 +3,7 @@ import {
   lengthValidator,
   registerPrompts,
   showPrompt,
+  sleep,
 } from "./helpers/utils";
 
 import {
@@ -33,6 +34,7 @@ import { prompt } from "inquirer";
 registerPrompts();
 
 const companySwitch = async (companies: CompanyType[]) => {
+  // TODO: Move into separate file
   const companiesData = {
     trendyol: {
       company: "trendyol",
@@ -52,13 +54,16 @@ const companySwitch = async (companies: CompanyType[]) => {
     },
   };
 
+  // TODO: Comment the code
+
   const data = companies.map((company) => {
     return companiesData[company] as PromptQuestionFunctionProps;
   });
 
-  const [mainCollection, companyBasedCollections, configCollection] =
+  const { mainCollection, companyBasedCollections, configCollection } =
     productPrompt(data);
 
+  // TODO: For some reason it's prompting twice, first prompt (Marka) When mainAnswers is not prompted it works fine
   const mainAnswers = (await showPrompt(
     mainCollection
   )) as MainProductPromptType;
@@ -113,4 +118,4 @@ const companySwitch = async (companies: CompanyType[]) => {
 
 // TODO: Check if main code exists in notion
 
-// TODO: Run hepsiburada and trendyol in sync (at the same time)
+// TODO: Search-checkbox validate in a way you can't write spaces // It's not possible. I need to register a new prompt
