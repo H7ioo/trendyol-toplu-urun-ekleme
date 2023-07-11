@@ -119,3 +119,10 @@ const companySwitch = async (companies: CompanyType[]) => {
 // TODO: Check if main code exists in notion
 
 // TODO: Search-checkbox validate in a way you can't write spaces // It's not possible. I need to register a new prompt
+// readline.emitKeypressEvents(process.stdin);
+
+// if (process.stdin.isTTY) process.stdin.setRawMode(true);
+
+// process.stdin.on("keypress", (chunk, key) => {
+//   console.log(key);
+// });
