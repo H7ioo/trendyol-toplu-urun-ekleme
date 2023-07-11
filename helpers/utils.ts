@@ -87,7 +87,7 @@ export function digitGen(length: number) {
  * @returns true if the string is longer than zero
  */
 
-export function lengthValidator(text: string | string[]) {
+export function lengthValidator<T extends string | T[]>(text: T | T[] | []) {
   // TODO: Prompt an error message but sometimes I wan't to get false because it's conditional
   if (Array.isArray(text))
     return text.length > 0 && text[0].length > 0 ? true : false;

@@ -3,7 +3,6 @@ import {
   lengthValidator,
   registerPrompts,
   showPrompt,
-  sleep,
 } from "./helpers/utils";
 
 import {

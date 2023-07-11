@@ -6,8 +6,8 @@ import {
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 import { ENV } from "../helpers/env";
-import { lengthValidator } from "../helpers/utils";
 import { CompanyType } from "../types/types";
+import { lengthValidator } from "../helpers/utils";
 
 const notion = new Client({
   auth: ENV.NOTION_TOKEN,
@@ -330,5 +330,5 @@ export const NotionProductCodeExists = async (
       break;
   }
 
-  return result.results.length > 0 ? true : false;
+  return lengthValidator(result.results);
 };
