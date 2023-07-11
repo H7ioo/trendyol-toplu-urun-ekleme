@@ -87,14 +87,27 @@ export function digitGen(length: number) {
  * @returns true if the string is longer than zero
  */
 
-export function lengthValidator<T extends string | T[]>(text: T | T[] | []) {
-  // TODO: Prompt an error message but sometimes I wan't to get false because it's conditional
+export function lengthValidator<T extends string | T[]>(
+  text: T | T[] | [],
+  errorMessage = false
+) {
   if (Array.isArray(text))
-    return text.length > 0 && text[0].length > 0 ? true : false;
-  if (text.trim().length <= 0) return false;
+    return text.length > 0 && text[0].length > 0
+      ? true
+      : errorMessage
+      ? "Alan boş bırakılmamalı!"
+      : false;
+  if (text.trim().length <= 0)
+    return errorMessage ? "Alan boş bırakılmamalı!" : false;
   return true;
 }
 
+/**
+ *
+ * @param value the value which might be a string or a number.
+ * @param errorMessage the default is true. When set to true it returns an error message instead of boolean value
+ * @returns If the value is a number return true.
+ */
 export function numberValidator(value: string | number, errorMessage = true) {
   if (typeof value === "string") {
     const validator = !isNaN(parseFloat(value)) && lengthValidator(value);

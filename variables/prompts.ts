@@ -45,7 +45,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
       filter: (input: string) => {
         return capitalizeLetters(cleanUp(input));
       },
-      validate: lengthValidator,
+      validate: (input) => lengthValidator(input, true),
       suffix: ":",
     },
     {
@@ -55,7 +55,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
       filter: (input: string) => {
         return cleanUp(input, false);
       },
-      validate: lengthValidator,
+      validate: (input) => lengthValidator(input, true),
       suffix: ":",
     },
     {
@@ -87,7 +87,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
             return `Model kodu ${company.company}'da mevcut! Devam etmek için Enter tuşu basınız.`;
           }
         }
-        return lengthValidator(input);
+        return lengthValidator(input, true);
       },
       suffix: ":",
     },
@@ -123,7 +123,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
       type: "input",
       name: "productDescription",
       message: "Ürün açıklaması yazınız",
-      validate: lengthValidator,
+      validate: (input) => lengthValidator(input, true),
       suffix: ":",
     },
   ];
@@ -271,7 +271,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
               return capitalizeLetters(colorAnswer);
             });
         },
-        validate: lengthValidator,
+        validate: (input) => lengthValidator(input, true),
         suffix,
         when: company === "trendyol",
       },
@@ -281,7 +281,7 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
         name: "colors",
         message: "Renkleri seçiniz",
         choices: company === "hepsiburada" ? companyData.colors : [],
-        validate: lengthValidator,
+        validate: (input) => lengthValidator(input, true),
         suffix,
         when: company === "hepsiburada",
       },
