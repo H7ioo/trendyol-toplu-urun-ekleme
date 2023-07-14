@@ -71,14 +71,21 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
           const company = companies[i];
           console.log("\nKontrol ediliyor...");
           // Check if the product code exists
-          const productCodeExists = await NotionProductCodeExists(
-            input,
-            company.company
-          );
+          let productCodeExists;
+          if (productCodeExistsFlag[company.company].flag) {
+            productCodeExists = await NotionProductCodeExists(
+              input,
+              company.company
+            );
+          }
+
           // Check the flag and product code
           // TODO: Add to the product code don't create new one
           // TODO: Create a new one with the same product code
           // TODO: Get the count of the results (how many product with the same product code)
+          // TODO: Add an option to create a new product or add to existing product
+          // - Query notion database => pass it to inq search list
+
           if (
             productCodeExistsFlag[company.company].flag &&
             productCodeExists

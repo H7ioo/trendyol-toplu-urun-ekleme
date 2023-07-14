@@ -41,6 +41,7 @@ export const trendyolNotionCreateProduct = async ({
   mainModalCode,
   description,
 }: TrendyolNotionProps["createProduct"]) => {
+  // TODO: Create ENV variables or something similar for the properties names etc.
   const productObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.TRENDYOL_PRODUCT_DATABASE,

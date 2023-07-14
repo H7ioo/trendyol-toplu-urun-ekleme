@@ -91,24 +91,35 @@ export function lengthValidator<T extends string | T[]>(
   text: T | T[] | [],
   errorMessage = false
 ) {
-  if (Array.isArray(text))
-    return text.length > 0 && text[0].length > 0
-      ? true
-      : errorMessage
-      ? "Alan boş bırakılmamalı!"
-      : false;
+  if (Array.isArray(text)) {
+    const arrayLength = text.length > 0;
+    // [{}][0].length => undefined so we need to check for it.
+    if (typeof text[0] === "string") {
+      return arrayLength && text[0].length > 0
+        ? true
+        : errorMessage
+        ? "Alan boş bırakılmamalı!"
+        : false;
+    } else {
+      return arrayLength
+        ? true
+        : errorMessage
+        ? "Alan boş bırakılmamalı!"
+        : false;
+    }
+  }
   if (text.trim().length <= 0)
     return errorMessage ? "Alan boş bırakılmamalı!" : false;
   return true;
 }
 
 /**
- *
+ * It checks if the passed value is a number
  * @param value the value which might be a string or a number.
  * @param errorMessage the default is true. When set to true it returns an error message instead of boolean value
  * @returns If the value is a number return true.
  */
-export function numberValidator(value: string | number, errorMessage = true) {
+export function numberValidator(value: string, errorMessage = true) {
   if (typeof value === "string") {
     const validator = !isNaN(parseFloat(value)) && lengthValidator(value);
     if (errorMessage) return validator ? true : "Sadece sayılar yazılmalı!";
@@ -118,6 +129,12 @@ export function numberValidator(value: string | number, errorMessage = true) {
   }
 }
 
+/**
+ * Converts string to a number
+ * @param value string which will get converted to a number
+ * @param float I want number with float
+ * @returns a number
+ */
 export function convertToNumber(value: string, float = true) {
   const v = value.replace(/,/gi, ".");
   if (float) return parseFloat(v);
@@ -167,6 +184,8 @@ export const pathRegex = new RegExp(/^[a-zA-Z]:\\(\w+\\)*\w*$/, "i");
 
 /**
  * Replaces Turkish weird I letter with English I letter
+ * @param text
+ * @returns a text without Turkish letters
  */
 export function replaceTurkishI(text: string) {
   return text.replace(/i̇/gi, "i").replace(/İ/gi, "I");
@@ -263,11 +282,19 @@ export async function showPrompt(questionsCollection: QuestionCollection) {
   return result;
 }
 
-// Phone brand
-export const removePhoneBrandRegEx = (phoneType: string) => {
-  return new RegExp(replaceTurkishI(phoneType).toLowerCase(), "gi");
+/**
+ * Regex to remove phoneBrand
+ * @param phoneBrand Name of the phone brand
+ * @returns
+ */
+export const removePhoneBrandRegEx = (phoneBrand: string) => {
+  return new RegExp(replaceTurkishI(phoneBrand).toLowerCase(), "gi");
 };
 
+/**
+ * Generate information about the product like barcode and adds it to a field
+ * @param props
+ */
 export function generateInformationLoop(props: InformationLoopType) {
   const {
     mergedPhonesList,
@@ -443,9 +470,10 @@ export function registerPrompts() {
   registerPrompt("search-checkbox", require("inquirer-search-checkbox"));
 }
 
-// TODO: Add an option to create a new product or add to existing product
-// - Query notion database => pass it to inq search list
-
+/**
+ * Generates information inside of notion
+ * @param props
+ */
 export async function runNotion(
   props: { title: string } & (
     | { company: "trendyol"; objectArray: TrendyolFields[] }
@@ -534,8 +562,14 @@ export async function runNotion(
   }
 }
 
-export function replaceEmptyStringWord<T>(value: T, emptyStringWord: string) {
-  return value === emptyStringWord ? "" : value;
+/**
+ * Checks if the passed value equals to the word. If it does we pass empty string else we pass the value.
+ * @param value usually a string value
+ * @param emptyStringWord a word
+ * @returns
+ */
+export function replaceEmptyStringWord<T>(value: T, word: string) {
+  return value === word ? "" : value;
 }
 
 export function generateStupidHepsiburadaBarcode() {
@@ -570,10 +604,16 @@ export async function compile(props: ProductPromptType) {
     company,
   } = props;
 
+  const phonesCollectionsCheck = [];
+
+  if (phonesCollections) {
+    phonesCollectionsCheck.push(...phonesCollections);
+  }
+
   const mergedPhonesList = [
     ...writtenPhonesList,
     ...phonesList,
-    ...phonesCollections,
+    ...phonesCollectionsCheck,
   ];
   const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
   generateInformationLoop({
@@ -604,6 +644,11 @@ export async function compile(props: ProductPromptType) {
   }
 }
 
+/**
+ * Converts a number to a string that contains a comma instead of a dot
+ * @param number
+ * @returns number string with comma instead of dot. 149.90 => "149,90"
+ */
 export function convertToCommaNumber(number: number) {
   return number.toString().replace(/\./gi, ",");
 }

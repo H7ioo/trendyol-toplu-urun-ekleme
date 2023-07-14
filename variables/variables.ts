@@ -3224,6 +3224,7 @@ export const colorsH = [
 
 export const caseBrandsH = [
   "Apple",
+  "Xiaomi",
   "Redmi",
   "Samsung",
   "Huawei",

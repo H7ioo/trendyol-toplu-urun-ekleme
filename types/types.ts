@@ -115,7 +115,7 @@ export type TrendyolPromptType = {
   guaranteePeriod: (typeof guaranteePeriodsT)[number];
   colors: string[];
   marketPrice: number;
-  phonesCollections: TrendyolPhonesCollection["phonesCollection"];
+  phonesCollections: TrendyolPhonesCollection["phonesCollection"] | undefined;
 };
 
 export type HepsiburadaPromptType = {
@@ -126,7 +126,9 @@ export type HepsiburadaPromptType = {
   caseMaterial: (typeof caseMaterialsH)[number];
   caseType: (typeof caseTypesH)[number];
   caseBrand: (typeof caseBrandsH)[number];
-  phonesCollections: HepsiburadaPhonesCollection["phonesCollection"];
+  phonesCollections:
+    | HepsiburadaPhonesCollection["phonesCollection"]
+    | undefined;
 };
 
 export type ConfigProductPromptType = {
