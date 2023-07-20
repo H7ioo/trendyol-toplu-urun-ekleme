@@ -15,28 +15,42 @@ import {
   colorsH,
   companies,
   guaranteePeriodsT,
+  myWatchList,
   phonesH,
   phonesT,
+  productTypes,
+  watchBrandsH,
+  watchMaterialT,
 } from "./variables/variables";
-import {
+import type {
   CompanyType,
   ConfigProductPromptType,
   HepsiburadaPromptType,
+  HepsiburadaWatchPromptType,
   MainProductPromptType,
   ProductPromptType,
+  ProductTypes,
   PromptQuestionFunctionProps,
   TrendyolPromptType,
+  TrendyolWatchPromptType,
 } from "./types/types";
 import { productPrompt } from "./variables/prompts";
 import { prompt } from "inquirer";
 
 registerPrompts();
 
-const companySwitch = async (companies: CompanyType[]) => {
+const companySwitch = async ({
+  companies,
+  productType,
+}: {
+  companies: CompanyType[];
+  productType: ProductTypes;
+}) => {
   // TODO: Move into separate file
-  const companiesData = {
+  const caseCompaniesData = {
     trendyol: {
       company: "trendyol",
+      productType: "kılıf",
       caseBrands: caseBrandsT,
       caseMaterials: caseMaterialsT,
       caseTypes: caseTypesT,
@@ -45,6 +59,7 @@ const companySwitch = async (companies: CompanyType[]) => {
     },
     hepsiburada: {
       company: "hepsiburada",
+      productType: "kılıf",
       caseBrands: caseBrandsH,
       caseMaterials: caseMaterialsH,
       caseTypes: caseTypesH,
@@ -53,10 +68,32 @@ const companySwitch = async (companies: CompanyType[]) => {
     },
   };
 
+  const watchCompaniesData = {
+    trendyol: {
+      company: "trendyol",
+      productType: "kordon",
+      watchMaterial: watchMaterialT,
+      watchList: myWatchList,
+      guaranteePeriods: guaranteePeriodsT,
+    },
+    hepsiburada: {
+      company: "hepsiburada",
+      productType: "kordon",
+      watchBrands: watchBrandsH,
+      watchList: myWatchList,
+      colors: colorsH,
+    },
+  };
+
   // TODO: Comment the code
 
   const data = companies.map((company) => {
-    return companiesData[company] as PromptQuestionFunctionProps;
+    if (productType === "kılıf") {
+      return caseCompaniesData[company] as PromptQuestionFunctionProps;
+    } else if (productType === "kordon") {
+      return watchCompaniesData[company] as PromptQuestionFunctionProps;
+    }
+    throw new Error("Something went wrong! Product type was wrong.");
   });
 
   const { mainCollection, companyBasedCollections, configCollection } =
@@ -66,7 +103,10 @@ const companySwitch = async (companies: CompanyType[]) => {
   const mainAnswers = (await showPrompt(
     mainCollection
   )) as MainProductPromptType;
-  const companyAnswers = [] as (HepsiburadaPromptType | TrendyolPromptType)[];
+  const companyAnswers = [] as (
+    | (HepsiburadaPromptType | TrendyolPromptType)
+    | (HepsiburadaWatchPromptType | TrendyolWatchPromptType)
+  )[];
   for (let index = 0; index < companyBasedCollections.length; index++) {
     const company = companyBasedCollections[index];
     const companyAnswer = (await showPrompt(company)) as
@@ -84,12 +124,13 @@ const companySwitch = async (companies: CompanyType[]) => {
       ...obj,
       ...configAnswers,
       company: companies[index],
+      productType,
     } as ProductPromptType);
   }
 };
 
 (async () => {
-  const { companies: com } = (await prompt([
+  const result = (await prompt([
     {
       type: "search-checkbox",
       name: "companies",
@@ -98,9 +139,17 @@ const companySwitch = async (companies: CompanyType[]) => {
       validate: lengthValidator,
       suffix: ":",
     },
-  ])) as { companies: CompanyType[] };
+    {
+      type: "search-list",
+      name: "productType",
+      message: "Ürün türü seçiniz",
+      choices: productTypes,
+      validate: lengthValidator,
+      suffix: ":",
+    },
+  ])) as { companies: CompanyType[]; productType: ProductTypes };
 
-  await companySwitch(com);
+  await companySwitch(result);
   // Quit
   process.exit(0);
 })();

@@ -1,13 +1,26 @@
 // ########################## TRENDYOL
 // Phone Case Category
 export const categoryT = "766" as const;
+export const categoryWatchT = "3222" as const;
 
 // Turkey Money Currency
 export const currencyT = "TRY" as const;
 
-export const KDVT = ["0", "1", "8", "18"] as const;
+export const KDVT = ["0", "1", "10", "20"] as const;
 
 export const emptyStringWord = "Boş alan";
+
+export const mmT = [
+  "38 mm",
+  "39mm",
+  "40 mm",
+  "41 mm",
+  "42 mm",
+  "43 MM",
+  "44 mm",
+  "45 mm",
+  "46 mm",
+] as const;
 
 // Available Material Types
 export const caseMaterialsT = [
@@ -38,6 +51,33 @@ export const guaranteePeriodsT = [
   "4 Yıl",
   "5 Yıl",
 ] as const;
+
+export const myWatchList = [
+  "Apple Watch 1",
+  "Apple Watch 2",
+  "Apple Watch 3",
+  "Apple Watch 4",
+  "Apple Watch 5",
+  "Apple Watch 6",
+  "Apple Watch SE",
+  "Apple Watch 7",
+  "Apple Watch 8",
+  "Apple Watch Ultra",
+] as const;
+
+export const watchMaterialT = [
+  "Çelik",
+  "Deri",
+  "Metal",
+  "Naylon",
+  "Plastik",
+  "Silikon",
+  "Suni Deri",
+  emptyStringWord,
+] as const;
+
+// TODO: Add the brands
+export const watchBrandsH = ["Apple"];
 
 export const phonesT = [
   "A5s",
@@ -822,7 +862,7 @@ export const caseBrandsT = [
 
 // ########################## HEPSIBURADA
 
-export const KDVH = ["0", "1", "8", "18"] as const;
+export const KDVH = ["0", "1", "10", "20"] as const;
 
 // Available Material Types
 export const caseMaterialsH = [
@@ -3247,3 +3287,4 @@ export const guaranteeTypesH = [
 export const waterProofH = ["Var, Yok"] as const;
 
 export const companies = ["trendyol", "hepsiburada"];
+export const productTypes = ["kılıf", "kordon"] as const;

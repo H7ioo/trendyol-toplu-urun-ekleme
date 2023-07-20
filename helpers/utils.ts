@@ -3,17 +3,28 @@ import fs from "fs";
 import * as XLSX from "xlsx";
 import {
   HepsiburadaFields,
+  HepsiburadaPromptType,
+  HepsiburadaWatchFields,
+  HepsiburadaWatchPromptType,
   InformationLoopType,
   ProductPromptType,
+  ProductTypes,
+  PromptQuestionFunctionProps,
   TrendyolFields,
+  TrendyolPromptType,
+  TrendyolWatchFields,
+  TrendyolWatchPromptType,
+  phonesCollectionPromptType,
 } from "../types/types";
 import {
   KDVH,
   KDVT,
   categoryT,
+  categoryWatchT,
   crapH,
   currencyT,
   emptyStringWord,
+  mmT,
   phonesH,
   phonesT,
 } from "../variables/variables";
@@ -295,10 +306,11 @@ export const removePhoneBrandRegEx = (phoneBrand: string) => {
  * Generate information about the product like barcode and adds it to a field
  * @param props
  */
-export function generateInformationLoop(props: InformationLoopType) {
+export function generateCaseInfoLoop(props: InformationLoopType) {
+  if (props.productType === "kordon") throw new Error("Wrong loop!");
   const {
     mergedPhonesList,
-    phoneBrand,
+    productBrand,
     title,
     productCode,
     colors,
@@ -316,7 +328,7 @@ export function generateInformationLoop(props: InformationLoopType) {
     for (let i = 0; i < mergedPhonesList.length; i++) {
       // - This works only if I wrote the phoneType the same as the phone brand written in the file
       // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
-      const regex = removePhoneBrandRegEx(phoneBrand);
+      const regex = removePhoneBrandRegEx(productBrand);
       // Example: Iphone 11 Pro (from Excel Sheet)
       const phoneName = mergedPhonesList[i] as (typeof phonesT)[number];
       // Example: 11 Pro
@@ -329,7 +341,7 @@ export function generateInformationLoop(props: InformationLoopType) {
       // Example: 11Pro
       const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
       // Example: iPhone 11 Pro Uyumlu I Love Your Mom
-      const productTitle = `${phoneBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+      const productTitle = `${productBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
       // Example: SB-11Pro
       const productModal = `${productCode}-${phoneCode}`;
       // Example: 691
@@ -383,7 +395,7 @@ export function generateInformationLoop(props: InformationLoopType) {
   } else if (company === "hepsiburada") {
     for (let i = 0; i < mergedPhonesList.length; i++) {
       // Example: Iphone 11 Pro (from Excel Sheet)
-      const regex = removePhoneBrandRegEx(phoneBrand);
+      const regex = removePhoneBrandRegEx(productBrand);
       // Example: Iphone 11 Pro (from Excel Sheet)
       const phoneName = mergedPhonesList[i] as (typeof phonesH)[number] &
         (typeof crapH)[number];
@@ -397,7 +409,7 @@ export function generateInformationLoop(props: InformationLoopType) {
       // Example: 11Pro
       const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
       // Example: iPhone 11 Pro Uyumlu I Love Your Mom
-      const productTitle = `${phoneBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+      const productTitle = `${productBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
       // Example: SB-11Pro
       const productModal = `${productCode}-${phoneCode}`;
       // Example: 691
@@ -454,6 +466,187 @@ export function generateInformationLoop(props: InformationLoopType) {
 
           // Push to the array
           objectArray.push(fields);
+        }
+      }
+    }
+  }
+}
+
+// TODO: Remove duplicated code );
+export function generateWatchInfoLoop(props: InformationLoopType) {
+  if (props.productType === "kılıf") throw new Error("Wrong loop!");
+  const {
+    mergedPhonesList,
+    productBrand,
+    title,
+    productCode,
+    colors,
+    trademark,
+    productDescription,
+    stockAmount,
+    price,
+    objectArray,
+    company,
+  } = props;
+  if (company === "trendyol") {
+    const { watchMaterial, mmList, writtenMmList } = props;
+    const mergedMmList = [...mmList, ...writtenMmList];
+    for (let i = 0; i < mergedPhonesList.length; i++) {
+      // - This works only if I wrote the phoneType the same as the phone brand written in the file
+      // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
+      const regex = removePhoneBrandRegEx(productBrand);
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const phoneName = mergedPhonesList[i] as (typeof phonesT)[number];
+      // Example: 11 Pro
+      const phoneNameWithoutBrand = capitalizeLetters(
+        cleanUp(
+          replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+          false
+        )
+      );
+      // Example: 11Pro
+      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // Example: 691
+      const randomDigits = digitGen(3);
+
+      for (let j = 0; j < colors.length; j++) {
+        for (let m = 0; m < mergedMmList.length; m++) {
+          const mm = mergedMmList[m];
+          // Example: SB-11Pro
+          const productModal = `${productCode}-${phoneCode}-${removeWhiteSpaces(
+            mm.slice(0, 2)
+          )}mm`;
+
+          // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+          const productTitle = `${productBrand} ${phoneNameWithoutBrand} (${mm.slice(
+            0,
+            2
+          )} mm) Uyumlu ${title}`;
+
+          // Example: Kırmızı
+          const color = colors[j];
+          // Example: SuarSB-11ProSari-691
+          const barcode = `${capitalizeLetters(
+            trademark ?? ""
+          )}${productModal}-${removeWhiteSpaces(color)}-${removeWhiteSpaces(
+            mm
+          ).slice(0, 2)}mm-${randomDigits}`;
+
+          // Fields
+          const fields: TrendyolWatchFields = {
+            Barkod: barcode,
+            "Model Kodu": productModal,
+            Marka: trademark ?? "",
+            Kategori: categoryWatchT,
+            "Para Birimi": currencyT,
+            "Ürün Adı": productTitle,
+            "Ürün Açıklaması": productDescription,
+            "Piyasa Satış Fiyatı (KDV Dahil)": props.marketPrice,
+            "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+            "Ürün Stok Adedi": stockAmount,
+            "Stok Kodu": productCode,
+            "KDV Oranı": KDVT["3"],
+            Desi: "",
+            "Görsel 1": "",
+            "Görsel 2": "",
+            "Görsel 3": "",
+            "Görsel 4": "",
+            "Görsel 5": "",
+            "Görsel 6": "",
+            "Görsel 7": "",
+            "Görsel 8": "",
+            "Sevkiyat Süresi": "",
+            "Sevkiyat Tipi": "",
+            Renk: color,
+            Beden: mmT.includes(mm as (typeof mmT)[number])
+              ? (mm as (typeof mmT)[number])
+              : "",
+            Materyal: replaceEmptyStringWord(watchMaterial, emptyStringWord),
+            "Garanti Süresi": props.guaranteePeriod,
+          };
+
+          // Push to the array
+          objectArray.push(fields);
+        }
+      }
+    }
+  } else if (company === "hepsiburada") {
+    const { watchBrand, writtenMmList } = props;
+    for (let i = 0; i < mergedPhonesList.length; i++) {
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const regex = removePhoneBrandRegEx(productBrand);
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const phoneName = mergedPhonesList[i] as (typeof phonesH)[number] &
+        (typeof crapH)[number];
+      // Example: 11 Pro
+      const phoneNameWithoutBrand = capitalizeLetters(
+        cleanUp(
+          replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+          false
+        )
+      );
+      // Example: 11Pro
+      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // Example: 691
+      // const randomDigits = digitGen(3);
+      const randomDigits = generateStupidHepsiburadaBarcode();
+      for (let j = 0; j < colors.length; j++) {
+        for (let m = 0; m < writtenMmList.length; m++) {
+          const mm = writtenMmList[m];
+          // Example: SB-11Pro
+          const productModal = `${productCode}-${phoneCode}-${removeWhiteSpaces(
+            mm.slice(0, 2)
+          )}mm`;
+
+          // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+          const productTitle = `${productBrand} ${phoneNameWithoutBrand} (${mm.slice(
+            0,
+            2
+          )} mm) Uyumlu ${title}`;
+
+          // Example: Kırmızı
+          const color = colors[j];
+          // Example: SuarSB-11Pro-Sari-691
+          // TODO: check if there is a better way to the barcode
+          // const barcode = `${capitalizeLetters(
+          //   trademark ?? ""
+          // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+          const barcode = randomDigits;
+
+          // Example: SB-11Pro-Siyah
+          const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
+            color
+          )}`.toUpperCase();
+
+          for (let x = 0; x < props.options.length; x++) {
+            const option = props.options[x];
+            // Fields
+            const fields: HepsiburadaWatchFields = {
+              "Ürün Adı": productTitle,
+              "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
+              Barkod: barcode,
+              "Varyant Grup Id": productModal,
+              "Ürün Açıklaması": productDescription,
+              Marka: trademark ?? "",
+              Desi: 1,
+              KDV: KDVH[3],
+              "Garanti Süresi (Ay)": 0,
+              Görsel1: "",
+              Görsel2: "",
+              Görsel3: "",
+              Görsel4: "",
+              Görsel5: "",
+              Fiyat: convertToCommaNumber(price),
+              Stok: stockAmount,
+              Video: "",
+              Renk: color,
+              Seçenek: option,
+              "Uyumlu Marka": watchBrand,
+            };
+
+            // Push to the array
+            objectArray.push(fields);
+          }
         }
       }
     }
@@ -592,55 +785,107 @@ export function generateStupidHepsiburadaBarcode() {
 }
 
 export async function compile(props: ProductPromptType) {
-  const {
-    path,
-    askToRunNotion,
-    productCode,
-    caseBrand,
-    title,
-    writtenPhonesList,
-    phonesList,
-    phonesCollections,
-    company,
-  } = props;
-
-  const phonesCollectionsCheck = [];
-
-  if (phonesCollections) {
-    phonesCollectionsCheck.push(...phonesCollections);
-  }
-
-  const mergedPhonesList = [
-    ...writtenPhonesList,
-    ...phonesList,
-    ...phonesCollectionsCheck,
-  ];
-  const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
-  generateInformationLoop({
-    ...props,
-    mergedPhonesList,
-    objectArray,
-  });
-
-  try {
-    // Write to excel file
-    writeToExcel(
-      objectArray,
-      cleanUp(path, false).replace(/"/gi, ""),
+  if (props.productType === "kılıf") {
+    const {
+      path,
+      askToRunNotion,
       productCode,
       caseBrand,
-      company
-    );
+      title,
+      writtenPhonesList,
+      phonesList,
+      phonesCollections,
+      company,
+    } = props;
 
-    if (askToRunNotion)
-      await runNotion({
-        title: title,
-        objectArray: objectArray,
-        company: company,
+    const phonesCollectionsCheck = [];
+
+    if (phonesCollections) {
+      phonesCollectionsCheck.push(...phonesCollections);
+    }
+
+    const mergedPhonesList = [
+      ...writtenPhonesList,
+      ...phonesList,
+      ...phonesCollectionsCheck,
+    ];
+    const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
+    generateCaseInfoLoop({
+      ...props,
+      mergedPhonesList,
+      objectArray,
+    });
+
+    try {
+      // Write to excel file
+      writeToExcel(
+        objectArray,
+        cleanUp(path, false).replace(/"/gi, ""),
         productCode,
-      });
-  } catch (error) {
-    console.log(error);
+        caseBrand,
+        company
+      );
+
+      if (askToRunNotion)
+        await runNotion({
+          title: title,
+          objectArray: objectArray,
+          company: company,
+          productCode,
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  } else if (props.productType === "kordon") {
+    const {
+      path,
+      askToRunNotion,
+      productCode,
+      title,
+      writtenWatchList,
+      company,
+      watchList,
+      watchCollections,
+    } = props;
+
+    const phonesCollectionsCheck = [];
+
+    if (watchCollections) {
+      phonesCollectionsCheck.push(...watchCollections);
+    }
+
+    const mergedPhonesList = [
+      ...writtenWatchList,
+      ...watchList,
+      ...phonesCollectionsCheck,
+    ];
+    const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
+    generateWatchInfoLoop({
+      ...props,
+      mergedPhonesList,
+      objectArray,
+    });
+
+    try {
+      // Write to excel file
+      writeToExcel(
+        objectArray,
+        cleanUp(path, false).replace(/"/gi, ""),
+        productCode,
+        company === "hepsiburada" ? props.watchBrand : props.productBrand,
+        company
+      );
+
+      if (askToRunNotion)
+        await runNotion({
+          title: title,
+          objectArray: objectArray,
+          company: company,
+          productCode,
+        });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
@@ -651,4 +896,435 @@ export async function compile(props: ProductPromptType) {
  */
 export function convertToCommaNumber(number: number) {
   return number.toString().replace(/\./gi, ",");
+}
+
+export function wordBasedOnProductType(productType: ProductTypes) {
+  switch (productType) {
+    case "kordon":
+      return "Saat";
+    case "kılıf":
+      return "Telefon";
+  }
+}
+
+import phonesCollectionData from "../config/phonesCollections.json";
+
+export function generateCompanyBasedCollections(
+  companies: PromptQuestionFunctionProps[]
+) {
+  const companyBasedCollections: QuestionCollection[] = [];
+  for (let index = 0; index < companies.length; index++) {
+    const companyData = companies[index];
+    const { company, productType } = companyData;
+    const productName = wordBasedOnProductType(productType);
+    const suffix = companies.length > 1 ? ` (${company}):` : ":";
+    if (productType === "kılıf") {
+      const { caseBrands, caseMaterials, caseTypes, company, phonesList } =
+        companyData;
+      const questionCollection: QuestionCollection = [
+        {
+          type: "input",
+          name: "trademark",
+          message: "Marka adı yazınız",
+          // validate: lengthValidator,
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "phonesCollections",
+          message: `${productName} koleksiyonu seçiniz`,
+          choices: () => {
+            // Get only THIS company array (trendyol)
+            const onlyCompanyArray =
+              phonesCollectionData.phonesCollections.filter((collection) => {
+                const c = collection as phonesCollectionPromptType;
+                return c.company === company;
+              });
+            // Get all collection names and show an array with it
+            const collectionNames = onlyCompanyArray.map((collection) => {
+              const c = collection as phonesCollectionPromptType;
+              return `${c.collectionName} => ${JSON.stringify(
+                c.phonesCollection
+              )}`;
+            });
+            return collectionNames;
+          },
+          filter: (input: string[]) => {
+            if (!lengthValidator(input)) return [];
+            // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
+            const collectionNames = input.map((collectionName) =>
+              collectionName.split(" =>")[0].trim()
+            );
+            const collections = phonesCollectionData.phonesCollections.filter(
+              (collection) => {
+                if (collectionNames.includes(collection.collectionName))
+                  return true;
+              }
+            );
+            return collections.map((collection) => collection.phonesCollection);
+          },
+          when: () => {
+            const onlyCompanyArray =
+              phonesCollectionData.phonesCollections.filter((collection) => {
+                const c = collection as phonesCollectionPromptType;
+                return c.company === company;
+              });
+
+            if (onlyCompanyArray.length <= 0) return false;
+            return true;
+          },
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "phonesList",
+          message: `${productName} modelleri seçiniz`,
+          choices: phonesList,
+          validate: (input: string[]) => {
+            console.log(`Count: ${input.length}`);
+            return true;
+          },
+          suffix,
+        },
+        {
+          // TODO: Can't trim empty string
+          type: "input",
+          name: "writtenPhonesList",
+          message: `${productName} modelleri yazınız (aralarında virgül koyarak)`,
+          filter: (input: string) => {
+            if (!lengthValidator(input)) return [];
+            return cleanUp(input)
+              .split(",")
+              .map((phone) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(phone);
+              });
+          },
+          validate: (
+            input: string,
+            answers: HepsiburadaPromptType | TrendyolPromptType
+          ) => {
+            if (
+              lengthValidator(answers?.phonesList) ||
+              // Because it might not exist
+              lengthValidator(answers?.phonesCollections ?? [])
+            )
+              return true;
+            return lengthValidator(input)
+              ? true
+              : `En az 1 ${productName} modeli yazılmalı ya da seçilmeli.`;
+          },
+          suffix,
+        },
+
+        {
+          type: "input",
+          name: "colors",
+          message: "Renkleri yazınız (aralarında virgül koyarak)",
+          filter: (input: string) => {
+            return cleanUp(input)
+              .split(",")
+              .map((colorAnswer) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(colorAnswer);
+              });
+          },
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "trendyol",
+        },
+
+        {
+          type: "search-checkbox",
+          name: "colors",
+          message: "Renkleri seçiniz",
+          choices: company === "hepsiburada" ? companyData.colors : [],
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "options",
+          message: "Seçenekler yazınız (aralarında virgül koyarak)",
+          filter: (input) => {
+            return cleanUp(input)
+              .split(",")
+              .map((option) => {
+                return capitalizeLetters(option);
+              });
+          },
+          suffix,
+          when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "marketPrice",
+          message: "Piyasa fiyatı yazınız",
+          filter: (input) => {
+            if (numberValidator(input, false)) {
+              return convertToNumber(input);
+            } else {
+              return input;
+            }
+          },
+          validate: numberValidator,
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "caseMaterial",
+          message: "Materyal seçiniz",
+          choices: caseMaterials,
+          suffix,
+        },
+        {
+          type: "search-list",
+          name: "caseType",
+          message: "Kılıf modeli seçiniz",
+          choices: caseTypes,
+          suffix,
+        },
+        {
+          type: "search-list",
+          name: "guaranteePeriod",
+          message: "Garanti süresi seçiniz",
+          choices: company === "trendyol" ? companyData.guaranteePeriods : [],
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "caseBrand",
+          message: "Uyumlu marka seçiniz",
+          choices: caseBrands,
+          suffix,
+        },
+      ];
+      companyBasedCollections.push(questionCollection);
+    } else if (productType === "kordon") {
+      const { watchList } = companyData;
+      const questionCollection: QuestionCollection = [
+        {
+          type: "input",
+          name: "trademark",
+          message: "Marka adı yazınız",
+          // validate: lengthValidator,
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "watchCollections",
+          message: `${productName} koleksiyonu seçiniz`,
+          // TODO: Change to watch collection
+          choices: () => {
+            // Get only THIS company array (trendyol)
+            const onlyCompanyArray =
+              phonesCollectionData.phonesCollections.filter((collection) => {
+                const c = collection as phonesCollectionPromptType;
+                return c.company === company;
+              });
+            // Get all collection names and show an array with it
+            const collectionNames = onlyCompanyArray.map((collection) => {
+              const c = collection as phonesCollectionPromptType;
+              return `${c.collectionName} => ${JSON.stringify(
+                c.phonesCollection
+              )}`;
+            });
+            return collectionNames;
+          },
+          filter: (input: string[]) => {
+            if (!lengthValidator(input)) return [];
+            // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
+            const collectionNames = input.map((collectionName) =>
+              collectionName.split(" =>")[0].trim()
+            );
+            const collections = phonesCollectionData.phonesCollections.filter(
+              (collection) => {
+                if (collectionNames.includes(collection.collectionName))
+                  return true;
+              }
+            );
+            return collections.map((collection) => collection.phonesCollection);
+          },
+          when: () => {
+            const onlyCompanyArray =
+              phonesCollectionData.phonesCollections.filter((collection) => {
+                const c = collection as phonesCollectionPromptType;
+                return c.company === company;
+              });
+
+            if (onlyCompanyArray.length <= 0) return false;
+            return true;
+          },
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "watchList",
+          message: `${productName} modelleri seçiniz`,
+          choices: watchList,
+          validate: (input: string[]) => {
+            console.log(`Count: ${input.length}`);
+            return true;
+          },
+          suffix,
+        },
+        {
+          // TODO: Can't trim empty string
+          type: "input",
+          name: "writtenWatchList",
+          message: `${productName} modelleri yazınız (aralarında virgül koyarak)`,
+          filter: (input: string) => {
+            if (!lengthValidator(input)) return [];
+            return cleanUp(input)
+              .split(",")
+              .map((phone) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(phone);
+              });
+          },
+          validate: (
+            input: string,
+            answers: HepsiburadaWatchPromptType | TrendyolWatchPromptType
+          ) => {
+            if (
+              lengthValidator(answers?.watchList) ||
+              // Because it might not exist
+              lengthValidator(answers?.watchCollections ?? [])
+            )
+              return true;
+            return lengthValidator(input)
+              ? true
+              : `En az 1 ${productName} modeli yazılmalı ya da seçilmeli.`;
+          },
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "mmList",
+          message: `MM seçiniz`,
+          choices: mmT,
+          validate: (input: string[]) => {
+            console.log(`Count: ${input.length}`);
+            return true;
+          },
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          // TODO: Can't trim empty string
+          type: "input",
+          name: "writtenMmList",
+          message: `MM yazınız (aralarında virgül koyarak)`,
+          filter: (input: string) => {
+            if (!lengthValidator(input)) return [];
+            return cleanUp(input)
+              .split(",")
+              .map((phone) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(phone);
+              });
+          },
+          validate: (
+            input: string,
+            answers: HepsiburadaWatchPromptType | TrendyolWatchPromptType
+          ) => {
+            // TODO: Add validation
+            return true;
+            return lengthValidator(input)
+              ? true
+              : `En az 1 ${productName} modeli yazılmalı ya da seçilmeli.`;
+          },
+          suffix,
+        },
+        {
+          type: "input",
+          name: "colors",
+          message: "Renkleri yazınız (aralarında virgül koyarak)",
+          filter: (input: string) => {
+            return cleanUp(input)
+              .split(",")
+              .map((colorAnswer) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(colorAnswer);
+              });
+          },
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "trendyol",
+        },
+
+        {
+          type: "search-checkbox",
+          name: "colors",
+          message: "Renkleri seçiniz",
+          choices: company === "hepsiburada" ? companyData.colors : [],
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "options",
+          message: "Seçenekler yazınız (aralarında virgül koyarak)",
+          filter: (input) => {
+            return cleanUp(input)
+              .split(",")
+              .map((option) => {
+                return capitalizeLetters(option);
+              });
+          },
+          suffix,
+          when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "marketPrice",
+          message: "Piyasa fiyatı yazınız",
+          filter: (input) => {
+            if (numberValidator(input, false)) {
+              return convertToNumber(input);
+            } else {
+              return input;
+            }
+          },
+          validate: numberValidator,
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "watchMaterial",
+          message: "Materyal seçiniz",
+          choices:
+            company === "trendyol" ? companyData.watchMaterial : undefined,
+          suffix,
+          when: company === "trendyol",
+        },
+
+        {
+          type: "search-list",
+          name: "guaranteePeriod",
+          message: "Garanti süresi seçiniz",
+          choices: company === "trendyol" ? companyData.guaranteePeriods : [],
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "watchBrand",
+          message: "Uyumlu marka seçiniz",
+          choices:
+            company === "hepsiburada" ? companyData.watchBrands : undefined,
+          suffix,
+          when: company === "hepsiburada",
+        },
+      ];
+      companyBasedCollections.push(questionCollection);
+    }
+  }
+  // console.log(companyBasedCollections);
+  return companyBasedCollections;
 }
