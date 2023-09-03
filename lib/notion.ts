@@ -9,9 +9,9 @@ import { ENV } from "../helpers/env";
 import { CompanyType } from "../types/types";
 import { lengthValidator } from "../helpers/utils";
 
-const notion = new Client({
-  auth: ENV.NOTION_TOKEN,
-});
+// const notion = new Client({
+//   auth: ENV.NOTION_TOKEN,
+// });
 
 interface TrendyolNotionProps {
   createProduct: {
@@ -41,6 +41,10 @@ export const trendyolNotionCreateProduct = async ({
   mainModalCode,
   description,
 }: TrendyolNotionProps["createProduct"]) => {
+  const notion = new Client({
+    auth: ENV.NOTION_TOKEN,
+  });
+
   // TODO: Create ENV variables or something similar for the properties names etc.
   const productObj: WithAuth<CreatePageParameters> = {
     parent: {
@@ -105,6 +109,10 @@ export const trendyolNotionCreateModelCode = async ({
   modelCode,
   relationId,
 }: TrendyolNotionProps["createModelCode"]) => {
+  const notion = new Client({
+    auth: ENV.NOTION_TOKEN,
+  });
+
   const modelObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.TRENDYOL_PRODUCT_MODAL_CODE_DATABASE,
@@ -137,6 +145,10 @@ export const trendyolNotionCreateBarcode = async ({
   barcode,
   relationId,
 }: TrendyolNotionProps["createBarcode"]) => {
+  const notion = new Client({
+    auth: ENV.NOTION_TOKEN,
+  });
+
   const barcodeObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.TRENDYOL_PRODUCT_BARCODE_DATABASE,
@@ -191,6 +203,10 @@ export const hepsiburadaNotionCreateProduct = async ({
   mainModalCode,
   description,
 }: HepsiburadaNotionProps["createProduct"]) => {
+  const notion = new Client({
+    auth: ENV.NOTION_TOKEN,
+  });
+
   const productObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.HEPSIBURADA_PRODUCT_DATABASE,
@@ -242,6 +258,10 @@ export const hepsiburadaNotionCreateStockCode = async ({
   stockCode,
   relationId,
 }: HepsiburadaNotionProps["createStockCode"]) => {
+  const notion = new Client({
+    auth: ENV.NOTION_TOKEN,
+  });
+
   const modelObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.HEPSIBURADA_PRODUCT_MODAL_CODE_DATABASE,
@@ -274,6 +294,10 @@ export const hepsiburadaNotionCreateBarcode = async ({
   barcode,
   relationId,
 }: HepsiburadaNotionProps["createBarcode"]) => {
+  const notion = new Client({
+    auth: ENV.NOTION_TOKEN,
+  });
+
   const barcodeObj: WithAuth<CreatePageParameters> = {
     parent: {
       database_id: ENV.HEPSIBURADA_PRODUCT_BARCODE_DATABASE,

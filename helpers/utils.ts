@@ -1,7 +1,16 @@
-import { QuestionCollection, prompt, registerPrompt } from "inquirer";
 import fs from "fs";
+import { QuestionCollection, prompt, registerPrompt } from "inquirer";
 import * as XLSX from "xlsx";
 import {
+  hepsiburadaNotionCreateProduct,
+  hepsiburadaNotionCreateStockCode,
+  trendyolNotionCreateBarcode,
+  trendyolNotionCreateModelCode,
+  trendyolNotionCreateProduct,
+} from "../lib/notion";
+import {
+  HepsiburadaEarPhonesFields,
+  HepsiburadaEarPhonesPromptType,
   HepsiburadaFields,
   HepsiburadaPromptType,
   HepsiburadaWatchFields,
@@ -10,6 +19,8 @@ import {
   ProductPromptType,
   ProductTypes,
   PromptQuestionFunctionProps,
+  TrendyolEarPhonesFields,
+  TrendyolEarPhonesPromptType,
   TrendyolFields,
   TrendyolPromptType,
   TrendyolWatchFields,
@@ -19,22 +30,17 @@ import {
 import {
   KDVH,
   KDVT,
+  categoryEarPhonesT,
   categoryT,
   categoryWatchT,
   crapH,
   currencyT,
+  earPhonesT,
   emptyStringWord,
   mmT,
   phonesH,
   phonesT,
 } from "../variables/variables";
-import {
-  hepsiburadaNotionCreateProduct,
-  hepsiburadaNotionCreateStockCode,
-  trendyolNotionCreateBarcode,
-  trendyolNotionCreateModelCode,
-  trendyolNotionCreateProduct,
-} from "../lib/notion";
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -308,6 +314,8 @@ export const removePhoneBrandRegEx = (phoneBrand: string) => {
  */
 export function generateCaseInfoLoop(props: InformationLoopType) {
   if (props.productType === "kordon") throw new Error("Wrong loop!");
+  if (props.productType === "kulaklık") throw new Error("Wrong loop!");
+  if (props.productType === "charm") throw new Error("Wrong loop!");
   const {
     mergedPhonesList,
     productBrand,
@@ -414,7 +422,6 @@ export function generateCaseInfoLoop(props: InformationLoopType) {
       const productModal = `${productCode}-${phoneCode}`;
       // Example: 691
       // const randomDigits = digitGen(3);
-      const randomDigits = generateStupidHepsiburadaBarcode();
       for (let j = 0; j < colors.length; j++) {
         // Example: Kırmızı
         const color = colors[j];
@@ -423,20 +430,24 @@ export function generateCaseInfoLoop(props: InformationLoopType) {
         // const barcode = `${capitalizeLetters(
         //   trademark ?? ""
         // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
-        const barcode = randomDigits;
+        // const barcode = randomDigits;
 
         // Example: SB-11Pro-Siyah
         const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
           color
         )}`.toUpperCase();
 
+        // This runs because props is ['']
         for (let x = 0; x < props.options.length; x++) {
+          const randomDigits = generateStupidHepsiburadaBarcode();
           const option = props.options[x];
           // Fields
           const fields: HepsiburadaFields = {
             "Ürün Adı": productTitle,
-            "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
-            Barkod: barcode,
+            "Satıcı Stok Kodu": option
+              ? `${iHateHepsiburada}-${option}`
+              : iHateHepsiburada, // Cause HEPSIBURADA SUCKS
+            Barkod: randomDigits,
             "Varyant Grup Id": productModal,
             "Ürün Açıklaması": productDescription,
             Marka: trademark ?? "",
@@ -472,9 +483,10 @@ export function generateCaseInfoLoop(props: InformationLoopType) {
   }
 }
 
-// TODO: Remove duplicated code );
-export function generateWatchInfoLoop(props: InformationLoopType) {
+export function generateEarPhonesInfoLoop(props: InformationLoopType) {
+  if (props.productType === "kordon") throw new Error("Wrong loop!");
   if (props.productType === "kılıf") throw new Error("Wrong loop!");
+  if (props.productType === "charm") throw new Error("Wrong loop!");
   const {
     mergedPhonesList,
     productBrand,
@@ -489,7 +501,158 @@ export function generateWatchInfoLoop(props: InformationLoopType) {
     company,
   } = props;
   if (company === "trendyol") {
-    const { watchMaterial, mmList, writtenMmList } = props;
+    for (let i = 0; i < mergedPhonesList.length; i++) {
+      // - This works only if I wrote the phoneType the same as the phone brand written in the file
+      // TODO: if the phoneType is 2 words, match for each one. For example: Samsung Galaxy, regex for both individually because sometimes the name is Galaxy without the samsung. The solution is to match for array of words ["samsung", "galaxy"]
+      const regex = removePhoneBrandRegEx(productBrand);
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const phoneName = mergedPhonesList[i] as (typeof earPhonesT)[number];
+      // Example: 11 Pro
+      const phoneNameWithoutBrand = capitalizeLetters(
+        cleanUp(
+          replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+          false
+        )
+      );
+      // Example: 11Pro
+      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+      const productTitle = `${productBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+      // Example: SB-11Pro
+      const productModal = `${productCode}-${phoneCode}`;
+      // Example: 691
+      const randomDigits = digitGen(3);
+      for (let j = 0; j < colors.length; j++) {
+        // Example: Kırmızı
+        const color = colors[j];
+        // Example: SuarSB-11ProSari-691
+        const barcode = `${capitalizeLetters(
+          trademark ?? ""
+        )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+
+        // Fields
+        const fields: TrendyolEarPhonesFields = {
+          Barkod: barcode,
+          "Model Kodu": productModal,
+          Marka: trademark ?? "",
+          Kategori: categoryEarPhonesT,
+          "Para Birimi": currencyT,
+          "Ürün Adı": productTitle,
+          "Ürün Açıklaması": productDescription,
+          "Piyasa Satış Fiyatı (KDV Dahil)": props.marketPrice,
+          "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+          "Ürün Stok Adedi": stockAmount,
+          "Stok Kodu": productCode,
+          "KDV Oranı": KDVT["3"],
+          Desi: "",
+          "Görsel 1": "",
+          "Görsel 2": "",
+          "Görsel 3": "",
+          "Görsel 4": "",
+          "Görsel 5": "",
+          "Görsel 6": "",
+          "Görsel 7": "",
+          "Görsel 8": "",
+          "Sevkiyat Süresi": "",
+          "Sevkiyat Tipi": "",
+          Renk: color,
+          "Garanti Süresi": props.guaranteePeriod,
+          "Uyumlu Marka": props.earPhonesBrand,
+          "Uyumlu Model": earPhonesT.includes(phoneName) ? phoneName : "",
+        };
+
+        // Push to the array
+        objectArray.push(fields);
+      }
+    }
+  } else if (company === "hepsiburada") {
+    for (let i = 0; i < mergedPhonesList.length; i++) {
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const regex = removePhoneBrandRegEx(productBrand);
+      // Example: Iphone 11 Pro (from Excel Sheet)
+      const phoneName = mergedPhonesList[i] as (typeof phonesH)[number] &
+        (typeof crapH)[number];
+      // Example: 11 Pro
+      const phoneNameWithoutBrand = capitalizeLetters(
+        cleanUp(
+          replaceTurkishI(phoneName).toLowerCase().replace(regex, ""),
+          false
+        )
+      );
+      // Example: 11Pro
+      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+      const productTitle = `${productBrand} ${phoneNameWithoutBrand} Uyumlu ${title}`;
+      // Example: SB-11Pro
+      const productModal = `${productCode}-${phoneCode}`;
+      // Example: 691
+      // const randomDigits = digitGen(3);
+      for (let j = 0; j < colors.length; j++) {
+        // Example: Kırmızı
+        const color = colors[j];
+        // Example: SuarSB-11Pro-Sari-691
+        // TODO: check if there is a better way to the barcode
+        // const barcode = `${capitalizeLetters(
+        //   trademark ?? ""
+        // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
+        // const barcode = randomDigits;
+
+        // Example: SB-11Pro-Siyah
+        const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
+          color
+        )}`.toUpperCase();
+
+        const randomDigits = generateStupidHepsiburadaBarcode();
+        // Fields
+        const fields: HepsiburadaEarPhonesFields = {
+          "Ürün Adı": productTitle,
+          "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
+          Barkod: randomDigits,
+          "Varyant Grup Id": productModal,
+          "Ürün Açıklaması": productDescription,
+          Marka: trademark ?? "",
+          Desi: 1,
+          KDV: KDVH[3],
+          "Garanti Süresi (Ay)": 0,
+          Görsel1: "",
+          Görsel2: "",
+          Görsel3: "",
+          Görsel4: "",
+          Görsel5: "",
+          Fiyat: convertToCommaNumber(price),
+          Stok: stockAmount,
+          Video: "",
+          Renk: color,
+          "Kulaklık Aksesuarı Türü": props.earPhonesAccessoryType,
+        };
+
+        // Push to the array
+        objectArray.push(fields);
+      }
+    }
+  }
+}
+
+// TODO: Remove duplicated code );
+export function generateWatchInfoLoop(props: InformationLoopType) {
+  if (props.productType === "kılıf") throw new Error("Wrong loop!");
+  if (props.productType === "kulaklık") throw new Error("Wrong loop!");
+  if (props.productType === "charm") throw new Error("Wrong loop!");
+  const {
+    mergedPhonesList,
+    productBrand,
+    title,
+    productCode,
+    colors,
+    trademark,
+    productDescription,
+    stockAmount,
+    price,
+    objectArray,
+    company,
+  } = props;
+  if (company === "trendyol") {
+    const { watchMaterial, mmList, writtenMmList, watchBrand } = props;
     const mergedMmList = [...mmList, ...writtenMmList];
     for (let i = 0; i < mergedPhonesList.length; i++) {
       // - This works only if I wrote the phoneType the same as the phone brand written in the file
@@ -504,33 +667,26 @@ export function generateWatchInfoLoop(props: InformationLoopType) {
           false
         )
       );
-      // Example: 11Pro
-      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // // Example: 11Pro
+      // const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
       // Example: 691
       const randomDigits = digitGen(3);
 
       for (let j = 0; j < colors.length; j++) {
         for (let m = 0; m < mergedMmList.length; m++) {
-          const mm = mergedMmList[m];
+          const mm = removeWhiteSpaces(mergedMmList[m].replace(/m/gi, ""));
           // Example: SB-11Pro
-          const productModal = `${productCode}-${phoneCode}-${removeWhiteSpaces(
-            mm.slice(0, 2)
-          )}mm`;
+          const productModal = `${productCode}-${productBrand}-${mm}mm`;
 
           // Example: iPhone 11 Pro Uyumlu I Love Your Mom
-          const productTitle = `${productBrand} ${phoneNameWithoutBrand} (${mm.slice(
-            0,
-            2
-          )} mm) Uyumlu ${title}`;
+          const productTitle = `${productBrand} ${phoneNameWithoutBrand} (${mm} mm) Uyumlu ${title}`;
 
           // Example: Kırmızı
           const color = colors[j];
           // Example: SuarSB-11ProSari-691
           const barcode = `${capitalizeLetters(
             trademark ?? ""
-          )}${productModal}-${removeWhiteSpaces(color)}-${removeWhiteSpaces(
-            mm
-          ).slice(0, 2)}mm-${randomDigits}`;
+          )}${productCode}-${removeWhiteSpaces(color)}-${mm}mm-${randomDigits}`;
 
           // Fields
           const fields: TrendyolWatchFields = {
@@ -558,11 +714,12 @@ export function generateWatchInfoLoop(props: InformationLoopType) {
             "Sevkiyat Süresi": "",
             "Sevkiyat Tipi": "",
             Renk: color,
-            Beden: mmT.includes(mm as (typeof mmT)[number])
-              ? (mm as (typeof mmT)[number])
+            Beden: mmT.includes(`${mm.slice(0, 2)} mm` as (typeof mmT)[number])
+              ? (`${mm.slice(0, 2)} mm` as (typeof mmT)[number])
               : "",
             Materyal: replaceEmptyStringWord(watchMaterial, emptyStringWord),
             "Garanti Süresi": props.guaranteePeriod,
+            "Uyumlu Marka": watchBrand,
           };
 
           // Push to the array
@@ -585,33 +742,22 @@ export function generateWatchInfoLoop(props: InformationLoopType) {
           false
         )
       );
-      // Example: 11Pro
-      const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
+      // // Example: 11Pro
+      // const phoneCode = removeWhiteSpaces(phoneNameWithoutBrand);
       // Example: 691
       // const randomDigits = digitGen(3);
-      const randomDigits = generateStupidHepsiburadaBarcode();
       for (let j = 0; j < colors.length; j++) {
         for (let m = 0; m < writtenMmList.length; m++) {
-          const mm = writtenMmList[m];
+          const mm = removeWhiteSpaces(writtenMmList[m].replace(/m/gi, ""));
           // Example: SB-11Pro
-          const productModal = `${productCode}-${phoneCode}-${removeWhiteSpaces(
-            mm.slice(0, 2)
-          )}mm`;
+          const productModal = `${productCode}-${productBrand}-${mm}mm`;
 
           // Example: iPhone 11 Pro Uyumlu I Love Your Mom
-          const productTitle = `${productBrand} ${phoneNameWithoutBrand} (${mm.slice(
-            0,
-            2
-          )} mm) Uyumlu ${title}`;
+          const productTitle = `${productBrand} ${phoneNameWithoutBrand} (${mm} mm) Uyumlu ${title}`;
 
           // Example: Kırmızı
           const color = colors[j];
           // Example: SuarSB-11Pro-Sari-691
-          // TODO: check if there is a better way to the barcode
-          // const barcode = `${capitalizeLetters(
-          //   trademark ?? ""
-          // )}${productModal}-${removeWhiteSpaces(color)}-${randomDigits}`;
-          const barcode = randomDigits;
 
           // Example: SB-11Pro-Siyah
           const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
@@ -619,12 +765,13 @@ export function generateWatchInfoLoop(props: InformationLoopType) {
           )}`.toUpperCase();
 
           for (let x = 0; x < props.options.length; x++) {
+            const randomDigits = generateStupidHepsiburadaBarcode();
             const option = props.options[x];
             // Fields
             const fields: HepsiburadaWatchFields = {
               "Ürün Adı": productTitle,
               "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
-              Barkod: barcode,
+              Barkod: randomDigits,
               "Varyant Grup Id": productModal,
               "Ürün Açıklaması": productDescription,
               Marka: trademark ?? "",
@@ -647,6 +794,235 @@ export function generateWatchInfoLoop(props: InformationLoopType) {
             // Push to the array
             objectArray.push(fields);
           }
+        }
+      }
+    }
+  }
+}
+export function generateCharmInfoLoop(props: InformationLoopType) {
+  if (props.productType === "kılıf") throw new Error("Wrong loop!");
+  if (props.productType === "kulaklık") throw new Error("Wrong loop!");
+  if (props.productType === "kordon") throw new Error("Wrong loop!");
+  const {
+    productBrand,
+    title,
+    productCode,
+    colors,
+    trademark,
+    productDescription,
+    stockAmount,
+    price,
+    objectArray,
+    company,
+  } = props;
+  if (company === "trendyol") {
+    const { watchMaterial, watchBrand, charmLetters } = props;
+    if (charmLetters.length > 0) {
+      for (let j = 0; j < colors.length; j++) {
+        for (let k = 0; k < charmLetters.length; k++) {
+          const charmLetter = charmLetters[k];
+          const productModal = `${productBrand}-${productCode}`;
+          const randomDigits = digitGen(3);
+
+          // Example: Apple Watch
+          const productTitle = `${productBrand} Uyumlu ${charmLetter} ${title}`;
+
+          // Example: Kırmızı
+          const color = colors[j];
+          // Example: SuarSB-11ProSari-691
+          const barcode = `${capitalizeLetters(
+            trademark ?? ""
+          )}${productCode}-${charmLetter}-${removeWhiteSpaces(
+            color
+          )}-${randomDigits}`;
+
+          // Fields
+          const fields: TrendyolWatchFields = {
+            Barkod: barcode,
+            "Model Kodu": productModal,
+            Marka: trademark ?? "",
+            Kategori: categoryWatchT,
+            "Para Birimi": currencyT,
+            "Ürün Adı": productTitle,
+            "Ürün Açıklaması": productDescription,
+            "Piyasa Satış Fiyatı (KDV Dahil)": props.marketPrice,
+            "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+            "Ürün Stok Adedi": stockAmount,
+            "Stok Kodu": productCode,
+            "KDV Oranı": KDVT["3"],
+            Desi: "",
+            "Görsel 1": "",
+            "Görsel 2": "",
+            "Görsel 3": "",
+            "Görsel 4": "",
+            "Görsel 5": "",
+            "Görsel 6": "",
+            "Görsel 7": "",
+            "Görsel 8": "",
+            "Sevkiyat Süresi": "",
+            "Sevkiyat Tipi": "",
+            Renk: color,
+            Beden: "",
+            Materyal: replaceEmptyStringWord(watchMaterial, emptyStringWord),
+            "Garanti Süresi": props.guaranteePeriod,
+            "Uyumlu Marka": watchBrand,
+          };
+
+          // Push to the array
+          objectArray.push(fields);
+        }
+      }
+    } else {
+      for (let j = 0; j < colors.length; j++) {
+        const productModal = `${productBrand}-${productCode}`;
+        const randomDigits = digitGen(3);
+
+        // Example: Apple Watch
+        const productTitle = `${productBrand} Uyumlu ${title}`;
+
+        // Example: Kırmızı
+        const color = colors[j];
+        // Example: SuarSB-11ProSari-691
+        const barcode = `${capitalizeLetters(
+          trademark ?? ""
+        )}${productCode}-${removeWhiteSpaces(color)}-${randomDigits}`;
+
+        // Fields
+        const fields: TrendyolWatchFields = {
+          Barkod: barcode,
+          "Model Kodu": productModal,
+          Marka: trademark ?? "",
+          Kategori: categoryWatchT,
+          "Para Birimi": currencyT,
+          "Ürün Adı": productTitle,
+          "Ürün Açıklaması": productDescription,
+          "Piyasa Satış Fiyatı (KDV Dahil)": props.marketPrice,
+          "Trendyol'da Satılacak Fiyat (KDV Dahil)": price,
+          "Ürün Stok Adedi": stockAmount,
+          "Stok Kodu": productCode,
+          "KDV Oranı": KDVT["3"],
+          Desi: "",
+          "Görsel 1": "",
+          "Görsel 2": "",
+          "Görsel 3": "",
+          "Görsel 4": "",
+          "Görsel 5": "",
+          "Görsel 6": "",
+          "Görsel 7": "",
+          "Görsel 8": "",
+          "Sevkiyat Süresi": "",
+          "Sevkiyat Tipi": "",
+          Renk: color,
+          Beden: "",
+          Materyal: replaceEmptyStringWord(watchMaterial, emptyStringWord),
+          "Garanti Süresi": props.guaranteePeriod,
+          "Uyumlu Marka": watchBrand,
+        };
+
+        // Push to the array
+        objectArray.push(fields);
+      }
+    }
+  } else if (company === "hepsiburada") {
+    const { watchBrand, charmLetters } = props;
+    if (charmLetters.length > 0) {
+      for (let j = 0; j < colors.length; j++) {
+        for (let k = 0; k < charmLetters.length; k++) {
+          const charmLetter = charmLetters[k];
+          // Example: SB-11Pro
+          const productModal = `${productBrand}-${productCode}`;
+
+          // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+          const productTitle = `${productBrand} Uyumlu ${charmLetter} ${title}`;
+
+          // Example: Kırmızı
+          const color = colors[j];
+          // Example: SuarSB-11Pro-Sari-691
+
+          // Example: SB-11Pro-Siyah
+          const iHateHepsiburada =
+            `${productModal}-${charmLetter}-${removeWhiteSpaces(
+              color
+            )}`.toUpperCase();
+
+          for (let x = 0; x < props.options.length; x++) {
+            const randomDigits = generateStupidHepsiburadaBarcode();
+            const option = props.options[x];
+            // Fields
+            const fields: HepsiburadaWatchFields = {
+              "Ürün Adı": productTitle,
+              "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
+              Barkod: randomDigits,
+              "Varyant Grup Id": productModal,
+              "Ürün Açıklaması": productDescription,
+              Marka: trademark ?? "",
+              Desi: 1,
+              KDV: KDVH[3],
+              "Garanti Süresi (Ay)": 0,
+              Görsel1: "",
+              Görsel2: "",
+              Görsel3: "",
+              Görsel4: "",
+              Görsel5: "",
+              Fiyat: convertToCommaNumber(price),
+              Stok: stockAmount,
+              Video: "",
+              Renk: color,
+              Seçenek: option,
+              "Uyumlu Marka": watchBrand,
+            };
+
+            // Push to the array
+            objectArray.push(fields);
+          }
+        }
+      }
+    } else {
+      for (let j = 0; j < colors.length; j++) {
+        // Example: SB-11Pro
+        const productModal = `${productBrand}-${productCode}`;
+
+        // Example: iPhone 11 Pro Uyumlu I Love Your Mom
+        const productTitle = `${productBrand} Uyumlu ${title}`;
+
+        // Example: Kırmızı
+        const color = colors[j];
+        // Example: SuarSB-11Pro-Sari-691
+
+        // Example: SB-11Pro-Siyah
+        const iHateHepsiburada = `${productModal}-${removeWhiteSpaces(
+          color
+        )}`.toUpperCase();
+
+        for (let x = 0; x < props.options.length; x++) {
+          const randomDigits = generateStupidHepsiburadaBarcode();
+          const option = props.options[x];
+          // Fields
+          const fields: HepsiburadaWatchFields = {
+            "Ürün Adı": productTitle,
+            "Satıcı Stok Kodu": iHateHepsiburada, // Cause HEPSIBURADA SUCKS
+            Barkod: randomDigits,
+            "Varyant Grup Id": productModal,
+            "Ürün Açıklaması": productDescription,
+            Marka: trademark ?? "",
+            Desi: 1,
+            KDV: KDVH[3],
+            "Garanti Süresi (Ay)": 0,
+            Görsel1: "",
+            Görsel2: "",
+            Görsel3: "",
+            Görsel4: "",
+            Görsel5: "",
+            Fiyat: convertToCommaNumber(price),
+            Stok: stockAmount,
+            Video: "",
+            Renk: color,
+            Seçenek: option,
+            "Uyumlu Marka": watchBrand,
+          };
+
+          // Push to the array
+          objectArray.push(fields);
         }
       }
     }
@@ -798,10 +1174,10 @@ export async function compile(props: ProductPromptType) {
       company,
     } = props;
 
-    const phonesCollectionsCheck = [];
+    const phonesCollectionsCheck: string[] = [];
 
     if (phonesCollections) {
-      phonesCollectionsCheck.push(...phonesCollections);
+      phonesCollectionsCheck.push(...phonesCollections.flat());
     }
 
     const mergedPhonesList = [
@@ -809,6 +1185,7 @@ export async function compile(props: ProductPromptType) {
       ...phonesList,
       ...phonesCollectionsCheck,
     ];
+
     const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
     generateCaseInfoLoop({
       ...props,
@@ -846,6 +1223,7 @@ export async function compile(props: ProductPromptType) {
       company,
       watchList,
       watchCollections,
+      watchBrand,
     } = props;
 
     const phonesCollectionsCheck = [];
@@ -872,7 +1250,90 @@ export async function compile(props: ProductPromptType) {
         objectArray,
         cleanUp(path, false).replace(/"/gi, ""),
         productCode,
-        company === "hepsiburada" ? props.watchBrand : props.productBrand,
+        // company === "hepsiburada" ? props.watchBrand : props.productBrand,
+        watchBrand,
+        company
+      );
+
+      if (askToRunNotion)
+        await runNotion({
+          title: title,
+          objectArray: objectArray,
+          company: company,
+          productCode,
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  } else if (props.productType === "kulaklık") {
+    const {
+      path,
+      askToRunNotion,
+      productCode,
+      title,
+      company,
+      earPhonesList,
+      earPhonesCollections,
+      writtenEarPhonesList,
+      productBrand,
+    } = props;
+
+    const phonesCollectionsCheck = [];
+
+    if (earPhonesCollections) {
+      phonesCollectionsCheck.push(...earPhonesCollections);
+    }
+
+    const mergedPhonesList = [
+      ...writtenEarPhonesList,
+      ...earPhonesList,
+      ...phonesCollectionsCheck,
+    ];
+    const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
+    generateEarPhonesInfoLoop({
+      ...props,
+      mergedPhonesList,
+      objectArray,
+    });
+
+    try {
+      // Write to excel file
+      writeToExcel(
+        objectArray,
+        cleanUp(path, false).replace(/"/gi, ""),
+        productCode,
+        company === "trendyol" ? props.earPhonesBrand : productBrand,
+        company
+      );
+
+      if (askToRunNotion)
+        await runNotion({
+          title: title,
+          objectArray: objectArray,
+          company: company,
+          productCode,
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  } else if (props.productType === "charm") {
+    const { path, askToRunNotion, productCode, title, company, watchBrand } =
+      props;
+
+    const objectArray: TrendyolFields[] & HepsiburadaFields[] = [];
+    generateCharmInfoLoop({
+      ...props,
+      mergedPhonesList: [],
+      objectArray,
+    });
+
+    try {
+      // Write to excel file
+      writeToExcel(
+        objectArray,
+        cleanUp(path, false).replace(/"/gi, ""),
+        productCode,
+        watchBrand,
         company
       );
 
@@ -904,6 +1365,10 @@ export function wordBasedOnProductType(productType: ProductTypes) {
       return "Saat";
     case "kılıf":
       return "Telefon";
+    case "kulaklık":
+      return "Kulaklık";
+    case "charm":
+      return "Charm";
   }
 }
 
@@ -957,7 +1422,10 @@ export function generateCompanyBasedCollections(
             );
             const collections = phonesCollectionData.phonesCollections.filter(
               (collection) => {
-                if (collectionNames.includes(collection.collectionName))
+                if (
+                  collectionNames.includes(collection.collectionName) &&
+                  collection.company === company
+                )
                   return true;
               }
             );
@@ -1007,7 +1475,7 @@ export function generateCompanyBasedCollections(
             if (
               lengthValidator(answers?.phonesList) ||
               // Because it might not exist
-              lengthValidator(answers?.phonesCollections ?? [])
+              lengthValidator(answers?.phonesCollections?.flat() ?? [])
             )
               return true;
             return lengthValidator(input)
@@ -1104,7 +1572,7 @@ export function generateCompanyBasedCollections(
       ];
       companyBasedCollections.push(questionCollection);
     } else if (productType === "kordon") {
-      const { watchList } = companyData;
+      const { watchList, watchBrands } = companyData;
       const questionCollection: QuestionCollection = [
         {
           type: "input",
@@ -1316,10 +1784,284 @@ export function generateCompanyBasedCollections(
           type: "search-list",
           name: "watchBrand",
           message: "Uyumlu marka seçiniz",
-          choices:
-            company === "hepsiburada" ? companyData.watchBrands : undefined,
+          choices: watchBrands,
+          suffix,
+        },
+      ];
+      companyBasedCollections.push(questionCollection);
+    } else if (productType === "kulaklık") {
+      const { earPhonesList } = companyData;
+      const questionCollection: QuestionCollection = [
+        {
+          type: "input",
+          name: "trademark",
+          message: "Marka adı yazınız",
+          // validate: lengthValidator,
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "earPhonesCollections",
+          message: `${productName} koleksiyonu seçiniz`,
+          // TODO: Change to watch collection
+          choices: () => {
+            // Get only THIS company array (trendyol)
+            const onlyCompanyArray =
+              phonesCollectionData.phonesCollections.filter((collection) => {
+                const c = collection as phonesCollectionPromptType;
+                return c.company === company;
+              });
+            // Get all collection names and show an array with it
+            const collectionNames = onlyCompanyArray.map((collection) => {
+              const c = collection as phonesCollectionPromptType;
+              return `${c.collectionName} => ${JSON.stringify(
+                c.phonesCollection
+              )}`;
+            });
+            return collectionNames;
+          },
+          filter: (input: string[]) => {
+            if (!lengthValidator(input)) return [];
+            // Get all collection names from the previous choices and split it by ( =>) and get the first element that contains the name of the collection
+            const collectionNames = input.map((collectionName) =>
+              collectionName.split(" =>")[0].trim()
+            );
+            const collections = phonesCollectionData.phonesCollections.filter(
+              (collection) => {
+                if (collectionNames.includes(collection.collectionName))
+                  return true;
+              }
+            );
+            return collections.map((collection) => collection.phonesCollection);
+          },
+          when: () => {
+            const onlyCompanyArray =
+              phonesCollectionData.phonesCollections.filter((collection) => {
+                const c = collection as phonesCollectionPromptType;
+                return c.company === company;
+              });
+
+            if (onlyCompanyArray.length <= 0) return false;
+            return true;
+          },
+          suffix,
+        },
+        {
+          type: "search-checkbox",
+          name: "earPhonesList",
+          message: `${productName} modelleri seçiniz`,
+          choices: earPhonesList,
+          validate: (input: string[]) => {
+            console.log(`Count: ${input.length}`);
+            return true;
+          },
+          suffix,
+        },
+        {
+          // TODO: Can't trim empty string
+          type: "input",
+          name: "writtenEarPhonesList",
+          message: `${productName} modelleri yazınız (aralarında virgül koyarak)`,
+          filter: (input: string) => {
+            if (!lengthValidator(input)) return [];
+            return cleanUp(input)
+              .split(",")
+              .map((phone) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(phone);
+              });
+          },
+          validate: (
+            input: string,
+            answers:
+              | HepsiburadaEarPhonesPromptType
+              | TrendyolEarPhonesPromptType
+          ) => {
+            if (
+              lengthValidator(answers?.earPhonesList) ||
+              // Because it might not exist
+              lengthValidator(answers?.earPhonesCollections ?? [])
+            )
+              return true;
+            return lengthValidator(input)
+              ? true
+              : `En az 1 ${productName} modeli yazılmalı ya da seçilmeli.`;
+          },
+          suffix,
+        },
+        {
+          type: "input",
+          name: "colors",
+          message: "Renkleri yazınız (aralarında virgül koyarak)",
+          filter: (input: string) => {
+            return cleanUp(input)
+              .split(",")
+              .map((colorAnswer) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(colorAnswer);
+              });
+          },
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-checkbox",
+          name: "colors",
+          message: "Renkleri seçiniz",
+          choices: company === "hepsiburada" ? companyData.colors : [],
+          validate: (input) => lengthValidator(input, true),
           suffix,
           when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "marketPrice",
+          message: "Piyasa fiyatı yazınız",
+          filter: (input) => {
+            if (numberValidator(input, false)) {
+              return convertToNumber(input);
+            } else {
+              return input;
+            }
+          },
+          validate: numberValidator,
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "guaranteePeriod",
+          message: "Garanti süresi seçiniz",
+          choices: company === "trendyol" ? companyData.guaranteePeriods : [],
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "earPhonesBrand",
+          message: "Uyumlu marka seçiniz",
+          choices: company === "trendyol" ? companyData.earPhonesBrands : [],
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "earPhonesAccessoryType",
+          message: "Aksesuar türü seçiniz",
+          choices:
+            company === "hepsiburada"
+              ? companyData.earPhonesAccessoryTypes
+              : [],
+          suffix,
+          when: company === "hepsiburada",
+        },
+      ];
+      companyBasedCollections.push(questionCollection);
+    } else if (productType === "charm") {
+      const { watchBrands } = companyData;
+      const questionCollection: QuestionCollection = [
+        {
+          type: "input",
+          name: "trademark",
+          message: "Marka adı yazınız",
+          // validate: lengthValidator,
+          suffix,
+        },
+        {
+          type: "input",
+          name: "charmLetters",
+          message: `Charm harfi yazınız (aralarında virgül koyarak)`,
+          filter: (input: string) => {
+            if (!lengthValidator(input)) return [];
+            return cleanUp(input)
+              .split(",")
+              .map((phone) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(phone);
+              });
+          },
+          suffix,
+        },
+        {
+          type: "input",
+          name: "colors",
+          message: "Renkleri yazınız (aralarında virgül koyarak)",
+          filter: (input: string) => {
+            return cleanUp(input)
+              .split(",")
+              .map((colorAnswer) => {
+                // return removeWhiteSpaces(capitalizeLetters(colorAnswer));
+                return capitalizeLetters(colorAnswer);
+              });
+          },
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "trendyol",
+        },
+
+        {
+          type: "search-checkbox",
+          name: "colors",
+          message: "Renkleri seçiniz",
+          choices: company === "hepsiburada" ? companyData.colors : [],
+          validate: (input) => lengthValidator(input, true),
+          suffix,
+          when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "options",
+          message: "Seçenekler yazınız (aralarında virgül koyarak)",
+          filter: (input) => {
+            return cleanUp(input)
+              .split(",")
+              .map((option) => {
+                return capitalizeLetters(option);
+              });
+          },
+          suffix,
+          when: company === "hepsiburada",
+        },
+        {
+          type: "input",
+          name: "marketPrice",
+          message: "Piyasa fiyatı yazınız",
+          filter: (input) => {
+            if (numberValidator(input, false)) {
+              return convertToNumber(input);
+            } else {
+              return input;
+            }
+          },
+          validate: numberValidator,
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "watchMaterial",
+          message: "Materyal seçiniz",
+          choices:
+            company === "trendyol" ? companyData.watchMaterial : undefined,
+          suffix,
+          when: company === "trendyol",
+        },
+
+        {
+          type: "search-list",
+          name: "guaranteePeriod",
+          message: "Garanti süresi seçiniz",
+          choices: company === "trendyol" ? companyData.guaranteePeriods : [],
+          suffix,
+          when: company === "trendyol",
+        },
+        {
+          type: "search-list",
+          name: "watchBrand",
+          message: "Uyumlu marka seçiniz",
+          choices: watchBrands,
+          suffix,
         },
       ];
       companyBasedCollections.push(questionCollection);

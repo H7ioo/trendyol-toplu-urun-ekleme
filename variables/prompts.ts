@@ -9,19 +9,16 @@ import {
   lengthValidator,
   numberValidator,
   pathRegex,
-  wordBasedOnProductType,
 } from "../helpers/utils";
-import { phonesT, phonesH } from "./variables";
 import {
   CompanyType,
-  ProductPromptType,
-  ProductTypes,
   PromptQuestionFunctionProps,
   phonesCollectionPromptType,
 } from "../types/types";
+import { phonesH, phonesT } from "./variables";
 
-import phonesCollectionData from "../config/phonesCollections.json";
 import configFileData from "../config/config.json";
+import phonesCollectionData from "../config/phonesCollections.json";
 import { NotionProductCodeExists } from "../lib/notion";
 
 // Questions collection
@@ -54,11 +51,16 @@ export const productPrompt = (companies: PromptQuestionFunctionProps[]) => {
     {
       type: "input",
       name: "productBrand",
-      message: "Ürünün bilinen adı yazınız",
+      message: "Markanın bilinen adı yazınız",
       filter: (input: string) => {
+        if (companies[0].productType === "kordon" && !lengthValidator(input))
+          return "";
         return cleanUp(input, false);
       },
-      validate: (input) => lengthValidator(input, true),
+      validate: (input) => {
+        if (companies[0].productType === "kordon") return true;
+        return lengthValidator(input, true);
+      },
       suffix: ":",
     },
     {

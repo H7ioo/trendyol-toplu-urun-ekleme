@@ -14,12 +14,20 @@ import {
   caseTypesT,
   colorsH,
   companies,
+  earPhonesAccessoryTypesH,
+  earPhonesBrandsT,
+  earPhonesGuaranteePeriodsT,
+  earPhonesT,
   guaranteePeriodsT,
+  myEarPhones,
   myWatchList,
   phonesH,
+  phonesHExtends,
   phonesT,
+  phonesTExtends,
   productTypes,
   watchBrandsH,
+  watchBrandsT,
   watchMaterialT,
 } from "./variables/variables";
 import type {
@@ -54,7 +62,7 @@ const companySwitch = async ({
       caseBrands: caseBrandsT,
       caseMaterials: caseMaterialsT,
       caseTypes: caseTypesT,
-      phonesList: phonesT,
+      phonesList: [...phonesT, ...phonesTExtends],
       guaranteePeriods: guaranteePeriodsT,
     },
     hepsiburada: {
@@ -63,7 +71,7 @@ const companySwitch = async ({
       caseBrands: caseBrandsH,
       caseMaterials: caseMaterialsH,
       caseTypes: caseTypesH,
-      phonesList: phonesH,
+      phonesList: [...phonesH, ...phonesHExtends],
       colors: colorsH,
     },
   };
@@ -75,12 +83,46 @@ const companySwitch = async ({
       watchMaterial: watchMaterialT,
       watchList: myWatchList,
       guaranteePeriods: guaranteePeriodsT,
+      watchBrands: watchBrandsT,
     },
     hepsiburada: {
       company: "hepsiburada",
       productType: "kordon",
       watchBrands: watchBrandsH,
       watchList: myWatchList,
+      colors: colorsH,
+    },
+  };
+
+  const earPhonesCompaniesData = {
+    trendyol: {
+      company: "trendyol",
+      productType: "kulaklık",
+      guaranteePeriods: earPhonesGuaranteePeriodsT,
+      earPhonesBrands: earPhonesBrandsT,
+      earPhonesList: earPhonesT,
+    },
+    hepsiburada: {
+      company: "hepsiburada",
+      productType: "kulaklık",
+      earPhonesAccessoryTypes: earPhonesAccessoryTypesH,
+      colors: colorsH,
+      earPhonesList: myEarPhones,
+    },
+  };
+
+  const charmCompaniesData = {
+    trendyol: {
+      company: "trendyol",
+      productType: "charm",
+      watchMaterial: watchMaterialT,
+      guaranteePeriods: guaranteePeriodsT,
+      watchBrands: watchBrandsT,
+    },
+    hepsiburada: {
+      company: "hepsiburada",
+      productType: "charm",
+      watchBrands: watchBrandsH,
       colors: colorsH,
     },
   };
@@ -92,6 +134,10 @@ const companySwitch = async ({
       return caseCompaniesData[company] as PromptQuestionFunctionProps;
     } else if (productType === "kordon") {
       return watchCompaniesData[company] as PromptQuestionFunctionProps;
+    } else if (productType === "kulaklık") {
+      return earPhonesCompaniesData[company] as PromptQuestionFunctionProps;
+    } else if (productType === "charm") {
+      return charmCompaniesData[company] as PromptQuestionFunctionProps;
     }
     throw new Error("Something went wrong! Product type was wrong.");
   });
